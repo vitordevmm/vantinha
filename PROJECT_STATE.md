@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.0.3`  
-> **Status**: Ativo & Operacional (Base Constatic + Discord Components V2 + Firestore + Fastify API)  
+> **Versão Vigente**: `Alpha 1.1.0`  
+> **Status**: Ativo & Operacional (Sistema de Verificação com API Fastify & Components V2)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 004)  
+> **Última Atualização**: 2026-11-13 (Build 005)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -34,6 +34,7 @@
 - **Token do Discord**: Armazenado com segurança exclusivamente no arquivo `.env` (variável `BOT_TOKEN`), validado em `src/env.ts`.
 - **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Chave do Service Account em `firebase.json` (variável `FIREBASE_PATH`).
 - **Servidor Web API**: Fastify rodando na porta `8080` (variável `SERVER_PORT`) para comunicação bidirecional com o futuro site/dashboard do Vanta.
+- **Segurança da API**: Chave secreta `API_SECRET_KEY` configurada no `.env` (validação via header `x-api-key`).
 - **Framework Base**: `constatic` (`@constatic/base` + `@magicyan/discord`).
 
 ---
@@ -62,7 +63,7 @@ Toda interface visual do Vantinha (containers e seções) deve seguir estritamen
 
 ```
 Vanta Bot/
-├── .env                     # Variáveis de ambiente sensíveis (Token, Port, Paths)
+├── .env                     # Variáveis de ambiente sensíveis (Token, Port, API Key)
 ├── .env.example             # Modelo documentado de variáveis
 ├── .gitignore               # Regras de exclusão do git (.env, node_modules, build, etc.)
 ├── constants.json           # Definição imutável de cores e metadados do bot
@@ -74,16 +75,17 @@ Vanta Bot/
 ├── PROJECT_STATE.md         # ESTE ARQUIVO: Memória e ledger contínuo do projeto
 └── src/
     ├── constants.ts         # Injeta constants.json em globalThis.constants (tipado)
-    ├── env.ts               # Validação de variáveis de ambiente com Zod
+    ├── env.ts               # Validação Zod com DASHBOARD_URL e API_SECRET_KEY
     ├── index.ts             # Ponto de entrada que executa o bootstrap do Constatic
     ├── database/            # Camada de persistência Firestore via Typesaurus
     │   ├── index.ts         # Inicialização segura do Firebase Admin e schema
     │   ├── documents/       # Tipagens dos documentos
-    │   │   ├── GuildDocument.ts   # Documento da guilda (canais, logs, etc.)
+    │   │   ├── GuildDocument.ts   # Documento da guilda com schema de verificação e logs
     │   │   └── MemberDocument.ts  # Documento do membro (xp, moedas, etc.)
-    │   └── functions/       # Funções utilitárias de CRUD (guilds e members)
+    │   └── functions/       # Funções utilitárias de CRUD (guilds, members, verification)
     │       ├── guilds.ts    # getGuildData, upsetGuildData, updateGuildData
-    │       └── members.ts   # getMemberData, upsetMemberData, updateMemberData
+    │       ├── members.ts   # getMemberData, upsetMemberData, updateMemberData
+    │       └── verification.ts # getVerificationConfig, saveVerificationConfig, findAltsByIp
     ├── discord/             # Módulos Discord auto-carregados pelo Constatic
     │   ├── index.ts         # setupCreators() exportando createCommand, createResponder, createEvent
     │   ├── commands/        # Comandos Slash e Context Menus (100% Components V2)
@@ -93,114 +95,96 @@ Vanta Bot/
     │   │       └── ping.ts    # Latência WebSocket e gateway com container V2
     │   ├── responders/      # Ouvintes de botões, selects e modais com radix router
     │   │   └── buttons/
-    │   │       └── remind.ts  # Responder do botão de ping com container V2
+    │   │       ├── remind.ts  # Responder do botão de ping
+    │   │       └── verify.ts  # Responder do botão 'verification/start' (link efêmero)
     │   └── events/          # Ouvintes de eventos do Discord.js
     │       ├── presence.ts  # Rotação dinâmica de status e Rich Presence temática
     │       ├── ready.ts     # Log personalizado de inicialização do Vantinha
     │       └── sample.ts    # Template para novos eventos
     ├── functions/           # Funções utilitárias e lógica de negócio
-    │   └── index.ts
+    │   ├── index.ts
+    │   └── verification.ts  # buildVerificationPanel (V2), sessões e tokens temporários
     └── server/              # Servidor API Fastify para comunicação com o site
         ├── index.ts         # Inicialização do Fastify via evento clientReady
         └── routes/          # Rotas HTTP estruturadas
             ├── index.ts     # Registro centralizador de rotas
-            └── home.ts      # Rota GET / com status, uptime e métricas do bot
+            ├── home.ts      # Rota GET / e GET /api/guilds (seletor de servidores)
+            └── verification.ts # Endpoints completos de verificação, configs e auditoria
 ```
 
 ---
 
-## 4. Boas Práticas & Diretrizes de Desenvolvimento
+## 4. Endpoints da API Fastify (Comunicação com o Site)
 
-### ✅ O QUE FAZER:
-1. **100% DISCORD COMPONENTS V2 EM TUDO**: Todas as respostas de interação, mensagens e interfaces DEVEM utilizar `createContainer(...)` com a flag `IsComponentsV2`.
-2. **Hot-Reload Automático (Zero Reinicialização Manual)**: `npm run dev` configurado com `node --watch-path=./src --watch --env-file=.env --import=tsx ./src/index.ts`. O bot detecta qualquer alteração ou novo arquivo no diretório `src/` e reinicia instantaneamente em segundo plano.
-3. **Checagem de Sintaxe Pré-Startup Obrigatória**: Antes de ligar o bot ou após alterações, execute `npm run check` (`tsc --noEmit`).
-4. **Auditoria dos Primeiros 10 Segundos**: Monitore a saída do terminal durante os primeiros 10 segundos para atestar que o processo subiu sem erros, conectou à API do Discord e abriu a porta 8080 do Fastify.
-5. **Subpath Imports Obrigatórios**: Utilize sempre `#env`, `#base`, `#database`, `#server`, `#functions` em vez de caminhos relativos profundos.
-6. **Estruturação Visual Moderna**: Utilize `createSection` (com botões ou thumbnails como acessórios), `createTextDisplay` para blocos informativos e `Separator` para ritmo visual.
-7. **Verbatim Module Syntax**: Escreva `import type { ... }` para tipos e `export type { ... }` para re-exportar interfaces.
-8. **Radix Routing com `createResponder`**: Use `customId: "acao/:param1/:param2"` e use o callback `parse` para deserializar e validar os parâmetros.
-9. **Fail-Fast no .env**: Qualquer nova variável de ambiente obrigatória deve ser tipada no schema do Zod em `src/env.ts`.
+Porta padrão: `8080`. Autenticação via header: `x-api-key: <API_SECRET_KEY>`.
 
-### ❌ O QUE NÃO FAZER:
-1. **NUNCA usar Embeds legadas (`EmbedBuilder`) ou ActionRows isoladas v13/v14**: O Vantinha opera exclusivamente com Components V2.
-2. **NUNCA esquecer a flag `IsComponentsV2`**: O Discord não renderizará a interface se essa flag for omitida.
-3. **NÃO ligar o bot sem antes rodar `npm run check`**.
-4. **NÃO ignorar os logs nos primeiros 10 segundos de execução**.
-5. **NÃO reiniciar o bot manualmente de forma desnecessária**: use o watch mode.
-6. **NÃO altere o código sem atualizar este arquivo (`PROJECT_STATE.md`)**.
-7. **NÃO comite nem exponha tokens ou chaves privadas**.
-8. **NÃO utilize caminhos relativos como `../../../../`**.
-9. **NÃO crie ouvintes de interação manuais** fora do padrão `createResponder`.
-10. **NÃO faça split manual de strings em customId** (`customId.split("_")`).
-11. **NÃO use createSection sem acessório**: se for puro texto, utilize `createTextDisplay("...")`.
+| Método | Endpoint | Protegido | Descrição |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | Não | Status geral do bot e métricas |
+| `GET` | `/api/guilds` | Não | Lista os servidores em que o bot está para o dashboard |
+| `GET` | `/api/guilds/:guildId/channels` | Não | Lista canais de texto para preencher dropdowns |
+| `GET` | `/api/guilds/:guildId/roles` | Não | Lista cargos do servidor para preencher dropdowns |
+| `GET` | `/api/guilds/:guildId/verification` | Não | Retorna configurações atuais de verificação |
+| `PUT` | `/api/guilds/:guildId/verification` | **Sim** | Salva/atualiza configurações (canais, cargos, alts, vpn, UI) |
+| `POST` | `/api/guilds/:guildId/verification/publish` | **Sim** | Envia ou atualiza o painel Components V2 no canal Discord |
+| `GET` | `/api/verification/session/:token` | Não | Valida o token temporário quando o usuário abre o site |
+| `POST` | `/api/verification/verify` | **Sim** | Processa o resultado da verificação (alts, vpn, cargo, logs) |
+| `GET` | `/api/guilds/:guildId/verification/logs` | Não | Retorna histórico de auditoria para tabela no site |
 
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
 
-### [Update #004] — Sistema de Presença Temática Rotativa & Comando /help em Components V2
+### [Update #005] — Sistema Completo de Verificação via Dashboard, API Fastify & Proteção Alts/VPN
 - **Data**: 2026-11-13
 - **Autor / Agente**: Antigravity & Usuário
 - **Resumo da Entrega**:
-  1. Criado `src/discord/events/presence.ts`: rotação automática e dinâmica a cada 20 segundos de Rich Presence, com frases temáticas de alto impacto no universo Vanta:
-     - 🌪️ `Ventando ecos sobre {membros} almas no Vanta` (`ActivityType.Custom`)
-     - ⚡ `Dúvidas sobre o cluster? Consulte /help` (`ActivityType.Playing`)
-     - 🌌 `Vigilante no ecossistema Vanta ({guilds} cluster ativo)` (`ActivityType.Watching`)
-     - 📡 `Sussurros na frequência do Vanta` (`ActivityType.Listening`)
-  2. Criado comando `/help` em `src/discord/commands/public/help.ts` rigorosamente em **100% Discord Components V2**:
-     - Container estruturado com tom `vantaAccent`.
-     - Seção de cabeçalho com botão acessório informativo.
-     - Blocos de texto formatados com `createTextDisplay` listando comandos (`/help`, `/ping`, `/counter`) e arquitetura.
-     - Flag mandatória `IsComponentsV2`.
-  3. Aprimorado `package.json` com `--watch-path=./src` para watch mode profundo de qualquer novo arquivo adicionado.
-  4. Protocolo de checagem prévia com `npm run check` passando com 0 erros.
-  5. Auditoria de 10 segundos confirmando auto-reload do daemon com os 3 comandos registrados e rotação de presença ativa.
+  1. Criada a arquitetura completa de **Verificação Controlada por Dashboard**:
+     - Suporte a ações configuráveis para contas alternativas/duplicadas (`block`, `kick`, `ban`, `flag`).
+     - Suporte a ações configuráveis para IP suspeito / VPN (`block`, `flag`).
+     - Seleção de canal do painel, canal de logs de auditoria, cargo entregue e cargo removido.
+     - Customização completa visual do painel (título, descrição, cor de destaque hex, label do botão, emoji e rodapé).
+  2. Implementado conjunto de endpoints na API Fastify (`src/server/routes/verification.ts` e `home.ts`):
+     - `GET /api/guilds`: lista servidores ativos.
+     - `GET /api/guilds/:guildId/channels` e `/roles`: alimentam os dropdowns do painel.
+     - `GET` & `PUT /api/guilds/:guildId/verification`: leitura e gravação segura das regras.
+     - `POST /api/guilds/:guildId/verification/publish`: renderiza e publica o painel no Discord em **100% Discord Components V2**.
+     - `GET /api/verification/session/:token`: handshake do usuário na página de verificação.
+     - `POST /api/verification/verify`: validação final de IP, alts e VPN, entrega de cargos no Discord e disparo de logs em Components V2.
+     - `GET /api/guilds/:guildId/verification/logs`: histórico de auditoria.
+  3. Criado responder do botão no Discord em `src/discord/responders/buttons/verify.ts` (`verification/start`), gerando token único de 15 minutos e entregando link efêmero em Components V2.
+  4. Validação de sintaxe `npm run check` com 0 erros e auditoria de logs no watch mode.
 - **Arquivos Criados / Modificados**:
-  - `src/discord/events/presence.ts` (criado)
-  - `src/discord/commands/public/help.ts` (criado)
-  - `package.json` (atualizado script de watch)
-  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.0.3`)
+  - `src/database/documents/GuildDocument.ts` (esquema ampliado)
+  - `src/database/functions/verification.ts` (CRUD de verificação e busca de alts por IP)
+  - `src/database/index.ts` (re-exportação das funções)
+  - `src/functions/verification.ts` (gerador do painel V2 e gerenciador de sessões)
+  - `src/functions/index.ts` (exportação de funções)
+  - `src/discord/responders/buttons/verify.ts` (responder do botão de verificação)
+  - `src/server/routes/verification.ts` (rotas Fastify de verificação)
+  - `src/server/routes/home.ts` (endpoint de listar servidores)
+  - `src/server/routes/index.ts` (registro das rotas)
+  - `src/env.ts`, `.env`, `.env.example` (`DASHBOARD_URL` e `API_SECRET_KEY`)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.1.0`)
 
 ---
+
+### [Update #004] — Sistema de Presença Temática Rotativa & Comando /help em Components V2
+- Rotação dinâmica de Rich Presence a cada 20 segundos e comando `/help` em Components V2.
 
 ### [Update #003] — Hot-Reload Nativo (Watch Mode), Checagem Pré-Startup & Auditoria de 10s
-- **Data**: 2026-11-13
-- **Autor / Agente**: Antigravity & Usuário
-- **Resumo da Entrega**:
-  1. Configuração do watch mode no Node.js com `--import=tsx`.
-  2. Instituição da checagem pré-startup e auditoria dos primeiros 10 segundos.
-  3. Inicialização como daemon e teste da rota da API Fastify.
-- **Arquivos Criados / Modificados**:
-  - `package.json`, `PROJECT_STATE.md`, `vantinha-project-ledger/SKILL.md`.
-
----
+- Watch mode automático e protocolos de checagem.
 
 ### [Update #002] — Promulgação da Lei Suprema de UI: 100% Discord Components V2 Exclusivo
-- **Data**: 2026-11-13
-- **Autor / Agente**: Antigravity & Usuário
-- **Resumo da Entrega**:
-  1. Estabelecida como regra pétrea a exigência de **100% Discord Components V2** (banimento de Embeds legadas e ActionRows v13 isoladas).
-  2. Atualização das skills e do ledger central com destaque de advertência crítica.
-- **Arquivos Criados / Modificados**:
-  - `PROJECT_STATE.md`, `C:\Users\pc\.gemini\config\skills\vantinha-project-ledger\SKILL.md`.
-
----
+- Banimento de embeds legadas e obrigatoriedade de Components V2.
 
 ### [Update #001] — Fundação, Bootstrap Constatic, Components V2, Firestore & Fastify API
-- **Data**: 2026-11-13
-- **Autor / Agente**: Antigravity & Usuário
-- **Resumo da Entrega**:
-  1. Leitura minuciosa da base Constatic, `@constatic/base` e `@magicyan/discord`.
-  2. Criação do projeto, variáveis no `.env`, cores em `constants.json`, Firestore e Fastify.
-  3. Criação de 3 skills e primeiro commit.
-- **Arquivos Criados / Modificados**:
-  - Todos os arquivos do projeto.
+- Inicialização do bot, tokens, Firestore e Fastify.
 
 ---
 
 ## 6. Próximos Passos & Roadmap
 
-1. [ ] **Chave Real do Firestore**: Inserir arquivo `firebase.json` do Firebase Console.
-2. [ ] **Endpoints para o Site**: Desenvolver novas rotas no Fastify (`/api/guilds`, `/api/stats`, `/api/config`) para conectar o site/dashboard ao bot.
-3. [ ] **Comandos de Gerenciamento do Vanta**: Novos comandos e menus 100% em Discord Components V2.
+1. [ ] **Front-end do Dashboard**: Fornecer o prompt pronto com especificações e contratos da API para o usuário construir a interface no site.
+2. [ ] **Chave Real do Firestore**: Inserir arquivo `firebase.json` do Firebase Console para persistência cloud definitiva.
+3. [ ] **Módulos Adicionais**: Sistema de Tickets e Sistema de Moderação via Dashboard.

@@ -35,3 +35,4 @@ export type GuildSchema = DatabaseSchema["guilds"]["Data"];
 
 export * from "./functions/guilds.js";
 export * from "./functions/members.js";
+export * from "./functions/verification.js";
