@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.3.0`  
-> **Status**: Ativo & Operacional (Sistema de Verificação, UserDocument, Fastify API & Criptografia E2E AES-256-GCM)  
+> **Versão Vigente**: `Alpha 1.4.0`  
+> **Status**: Ativo & Operacional (Sistema de Verificação, UserDocument, Fastify API, Criptografia E2E AES-256-GCM & Firestore Cloud Oficial)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 007)  
+> **Última Atualização**: 2026-11-13 (Build 008)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -32,7 +32,7 @@
 - **ID do Bot**: `1567751920645308548`
 - **Repositório / Workspace**: `c:\Users\pc\Documents\Vanta Bot`
 - **Token do Discord**: Armazenado com segurança exclusivamente no arquivo `.env` (variável `BOT_TOKEN`), validado em `src/env.ts`.
-- **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Coleções: `guilds`, `guilds/:id/members` e `users`.
+- **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Projeto oficial: `vantinha-e9fca`. Credenciais salvas em `firebase.json` e `serviceAccount.json` (ambos protegidos no `.gitignore`). Coleções ativas: `guilds`, `guilds/:id/members` e `users`.
 - **Servidor Web API**: Fastify rodando na porta `8080` (variável `SERVER_PORT`) para comunicação bidirecional com o futuro site/dashboard do Vanta.
 - **Segurança da API**: Chave secreta `API_SECRET_KEY` configurada no `.env` (validação via header `x-api-key`).
 - **Criptografia E2E da API**: AES-256-GCM ponta a ponta com chave derivada SHA-256 (`API_ENCRYPTION_KEY`). Envelopes autenticados `{ iv, authTag, data }` anti-violação e anti-adulteração.
@@ -46,10 +46,11 @@ Toda interface visual do Vantinha (containers e seções) deve seguir estritamen
 
 | Nome do Token | Hexadecimal | Uso Principal |
 | :--- | :--- | :--- |
+| `constants.colors.vantaGold` | `#E5A93C` | **Dourado Oficial Vanta** (Cor principal da marca e do site web) |
 | `constants.colors.vanta` | `#0a0a0c` | Fundo ultra-escuro (Vantablack aesthetic) |
 | `constants.colors.vantaDark` | `#121217` | Fundo de cartões secundários e containers |
 | `constants.colors.vantaLight` | `#1c1c24` | Bordas e superfícies destacadas |
-| `constants.colors.vantaAccent` | `#7c3aed` | Roxo elétrico oficial de destaque e identidade |
+| `constants.colors.vantaAccent` | `#7c3aed` | Roxo elétrico dos containers do bot no Discord |
 | `constants.colors.vantaCyan` | `#06b6d4` | Ciano neon para métricas, status e rotas da API |
 | `constants.colors.primary` | `#3b82f6` | Azul de ação primária |
 | `constants.colors.secondary` | `#4f545c` | Cinza neutro de ação secundária |
@@ -143,6 +144,22 @@ Porta padrão: `8080`.
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
 
+### [Update #008] — Conexão Definitiva do Google Cloud Firestore (Projeto: vantinha-e9fca)
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Integrado o arquivo de credenciais oficial `service_account` do Firebase para o projeto `vantinha-e9fca`.
+  2. Arquivos `firebase.json` e `serviceAccount.json` criados e blindados com regras no `.gitignore` para impedir vazamentos acidentais no Git.
+  3. Atualizado `src/database/index.ts` com fallback inteligente de caminhos (`env.FIREBASE_PATH`, `./firebase.json`, `./serviceAccount.json`) e log de identificação do projeto.
+  4. Executado teste funcional em tempo real com Typesaurus: operações de criação (`upset`), leitura (`get`) e remoção (`remove`) executadas com 100% de sucesso contra a nuvem do Google Cloud Firestore.
+  5. API Fastify já servindo e persistindo dados reais diretamente no Firestore em produção.
+- **Arquivos Modificados / Criados**:
+  - `firebase.json` (credenciais da Service Account salvas, ignorado pelo git)
+  - `serviceAccount.json` (espelho de segurança, ignorado pelo git)
+  - `.gitignore` (regras `/firebase.json` e `serviceAccount.json` asseguradas)
+  - `src/database/index.ts` (carregamento resiliente e logs de projeto)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.4.0`)
+
 ### [Update #007] — Camada de Criptografia E2E AES-256-GCM & Handshake de Segurança
 - **Data**: 2026-11-13
 - **Autor / Agente**: Antigravity & Usuário
@@ -209,6 +226,6 @@ Porta padrão: `8080`.
 
 ## 6. Próximos Passos & Roadmap
 
-1. [ ] **Front-end do Dashboard**: Instruir e criar as interfaces no site para consumir os endpoints.
-2. [ ] **Chave Real do Firestore**: Inserir arquivo `firebase.json` do Firebase Console para persistência cloud definitiva.
+1. [x] **Chave Real do Firestore**: Inserido `serviceAccount.json` / `firebase.json` do projeto oficial `vantinha-e9fca` com persistência ativa e testada.
+2. [ ] **Front-end do Dashboard**: Instruir e criar as interfaces no site para consumir os endpoints com AES-256-GCM.
 3. [ ] **Módulo de Moderação e Auditoria**: Novos endpoints e comandos.

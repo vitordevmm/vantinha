@@ -12,6 +12,9 @@
 
 # Config files
 /firebase.json
+/serviceAccount.json
+serviceAccount.json
+
 
 # Extensions
 *.zip
