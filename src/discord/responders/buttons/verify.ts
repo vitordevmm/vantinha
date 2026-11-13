@@ -16,21 +16,21 @@ createResponder({
         const container = createContainer(
             constants.colors.vantaAccent,
             createSection(
-                `# 🛡️ Portal de Verificação Vanta\nOlá, **${interaction.user.displayName}**!\nPara liberar sua conta no servidor, acesse nosso portal seguro e confirme sua identidade.`,
+                `# ${constants.emojis.protegidocomsucesso} Portal de Verificação Vanta\n${constants.emojis.ola} Olá, **${interaction.user.displayName}**!\nPara liberar sua conta no servidor, acesse nosso portal seguro e confirme sua identidade.`,
                 new ButtonBuilder({
                     style: ButtonStyle.Link,
                     label: "Completar Verificação",
                     url: verifyUrl,
-                    emoji: "🚀"
+                    emoji: constants.emojis.foguete
                 })
             ),
             Separator.Default,
             createTextDisplay(
-                "🔒 **Auditoria Ativa:** A análise de rede e integridade de IP será executada pelo portal.\n" +
-                "⏱️ **Validade:** Este link é único para você e expira em **15 minutos**."
+                `${constants.emojis.protegidocomsucesso} **Auditoria Ativa:** A análise de rede e integridade de IP será executada pelo portal.\n` +
+                `${constants.emojis.relogio} **Validade:** Este link é único para você e expira em **15 minutos**.`
             ),
             Separator.Hidden,
-            createTextDisplay("Nunca compartilhe este link com terceiros.")
+            createTextDisplay(`${constants.emojis.atencao} Nunca compartilhe este link com terceiros.`)
         );
 
         await interaction.reply({

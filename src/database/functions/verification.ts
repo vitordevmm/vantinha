@@ -17,11 +17,11 @@ export function getDefaultVerificationConfig(): GuildVerificationConfig {
             maxAccountsPerIp: 1,
         },
         ui: {
-            title: "🌌 Verificação Oficial • Vanta",
+            title: `${constants.emojis.Logovanta} Verificação Oficial • Vanta`,
             description: "Para acessar todos os canais do servidor e liberar sua conta no cluster, realize sua verificação segura clicando no botão abaixo.",
             accentColor: constants.colors.vantaAccent,
             buttonLabel: "Verificar Conta",
-            buttonEmoji: "🛡️",
+            buttonEmoji: constants.emojis.protegidocomsucesso,
             footerText: "Vanta Security Gateway • Autenticação Segura",
         },
     };

@@ -4,9 +4,9 @@ import { ApplicationCommandType, ButtonBuilder, ButtonStyle, MessageFlags } from
 
 // Catálogo com emojis temáticos para enriquecer os comandos
 const COMMAND_METADATA: Record<string, { emoji: string; category: string }> = {
-    help: { emoji: "🌌", category: "Sistema" },
-    ping: { emoji: "🏓", category: "Diagnóstico" },
-    counter: { emoji: "🔢", category: "Interativo" },
+    help: { emoji: constants.emojis.bussola, category: "Navegação" },
+    ping: { emoji: constants.emojis.ping, category: "Diagnóstico" },
+    counter: { emoji: constants.emojis.coins, category: "Interativo" },
 };
 
 createCommand({
@@ -40,9 +40,9 @@ createCommand({
             } else {
                 // Fallback de segurança garantido
                 commandLines.push(
-                    "• 🌌 **`/help`** — Central de auxílio e comandos do Vantinha.",
-                    "• 🏓 **`/ping`** — Analisa a latência do gateway Discord e tempo de resposta.",
-                    "• 🔢 **`/counter`** — Contador interativo oficial do Vantinha."
+                    `• ${constants.emojis.bussola} **\`/help\`** — Central de auxílio e comandos do Vantinha.`,
+                    `• ${constants.emojis.ping} **\`/ping\`** — Analisa a latência do gateway Discord e tempo de resposta.`,
+                    `• ${constants.emojis.coins} **\`/counter\`** — Contador interativo oficial do Vantinha.`
                 );
             }
 
@@ -51,29 +51,29 @@ createCommand({
             const container = createContainer(
                 constants.colors.vantaAccent,
                 createSection(
-                    `# 🌌 Central de Comandos • Vantinha\nEu sou o assistente oficial do ecossistema **Vanta**, operando em alta frequência para auxiliar você e a comunidade.`,
+                    `# ${constants.emojis.Logovanta} Central de Comandos • Vantinha\nEu sou o assistente oficial do ecossistema **Vanta**, operando em alta frequência para auxiliar você e a comunidade.`,
                     new ButtonBuilder({
                         customId: "help/refresh",
                         label: `${totalCmds} Comandos Ativos`,
                         style: ButtonStyle.Secondary,
                         disabled: true,
-                        emoji: "✨",
+                        emoji: constants.emojis.estrela,
                     })
                 ),
                 Separator.Default,
                 createTextDisplay(
-                    `### 📜 Comandos Disponíveis (${totalCmds})\n` +
+                    `### ${constants.emojis.lsita} Comandos Disponíveis (${totalCmds})\n` +
                     commandLines.join("\n")
                 ),
                 Separator.Default,
                 createTextDisplay(
-                    "### 🛰️ Suporte & Ecossistema Vanta\n" +
-                    "• **Comunidade:** Vanta Ecosystem Oficial\n" +
-                    "• **Status:** Operacional e vigilante 24/7\n" +
-                    "• **Segurança:** Proteção de membros e gateway ativo"
+                    `### ${constants.emojis.informacao} Suporte & Ecossistema Vanta\n` +
+                    `• **Comunidade:** ${constants.emojis.Logovanta} Vanta Ecosystem Oficial\n` +
+                    `• **Status:** ${constants.emojis.ativo} Operacional e vigilante 24/7\n` +
+                    `• **Segurança:** ${constants.emojis.protegidocomsucesso} Proteção de membros e gateway ativo`
                 ),
                 Separator.Hidden,
-                createTextDisplay("💡 *Dica: Use os comandos acima diretamente no chat para interagir com o Vantinha.*")
+                createTextDisplay(`${constants.emojis.lampada} *Dica: Use os comandos acima diretamente no chat para interagir com o Vantinha.*`)
             );
 
             await interaction.editReply({

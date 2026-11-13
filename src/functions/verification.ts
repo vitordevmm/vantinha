@@ -59,13 +59,13 @@ export function buildVerificationPanel(config: GuildVerificationConfig): Message
         customId: "verification/start",
         label: config.ui.buttonLabel || "Verificar Conta",
         style: ButtonStyle.Success,
-        emoji: config.ui.buttonEmoji || "🛡️",
+        emoji: config.ui.buttonEmoji || constants.emojis.protegidocomsucesso,
     });
 
     const container = createContainer(
         accentColor,
         createSection(
-            `# ${config.ui.title || "🌌 Verificação Oficial • Vanta"}\n${
+            `# ${config.ui.title || `${constants.emojis.Logovanta} Verificação Oficial • Vanta`}\n${
                 config.ui.description ||
                 "Realize sua verificação para liberar acesso completo ao servidor e seus recursos."
             }`,
@@ -73,7 +73,7 @@ export function buildVerificationPanel(config: GuildVerificationConfig): Message
         ),
         Separator.Default,
         createTextDisplay(
-            "🔒 **Segurança Ativa:** Proteção contra contas duplicadas (alts) e verificação de integridade de rede."
+            `${constants.emojis.protegidocomsucesso} **Segurança Ativa:** Proteção contra contas duplicadas (alts) e verificação de integridade de rede.`
         ),
         Separator.Hidden,
         createTextDisplay(`*${config.ui.footerText || "Vanta Security Gateway • Autenticação Segura"}*`)

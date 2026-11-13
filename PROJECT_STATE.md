@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 2.1.0`  
-> **Status**: Ativo & Operacional (Blindagem Anti-Timeout do /help, deferReply Imediato & Cache Pre-Warm)  
+> **Versão Vigente**: `Alpha 2.2.0`  
+> **Status**: Ativo & Operacional (Catálogo de 59 Emojis Oficiais Vanta Ativo & Lei Mandatória de Emojis)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
-> **Última Atualização**: 2026-11-13 (Build 015)  
+> **Última Atualização**: 2026-11-13 (Build 016)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -15,6 +15,15 @@
 > - É **terminantemente proibido** utilizar Embeds legadas (`EmbedBuilder` como casca de resposta) ou Action Rows soltas da API v13/v14 antiga.
 > - **100% das mensagens, comandos, painéis, modais e respostas interativas** devem ser construídas através de **`createContainer` / `ContainerPlusBuilder`**, estruturadas com `createSection`, `Separator`, `createTextDisplay`, `createThumbnail`, `createMediaGallery`, `createFile` e controles modernos (Checkbox, Radio, FileUpload).
 > - **Obrigatório em todas as respostas**: inclusão da flag `flags: ["IsComponentsV2"]` (ou `flags: ["Ephemeral", "IsComponentsV2"]`).
+
+---
+
+> [!CAUTION]
+> ### 🎭 LEI DOS EMOJIS PERSONALIZADOS (100% Emojis Vanta Oficiais)
+> **Todos os comandos, botões e interfaces do Vantinha DEVEM utilizar os emojis personalizados oficiais.**
+> - **Catálogo Oficial**: 59 emojis temáticos oficiais extraídos do servidor `vh.dog` e registrados em `constants.json` (`constants.emojis.*` ou `getEmoji("nome")`).
+> - **Banimento de Emojis Genéricos Unicode**: Não utilize emojis Unicode comuns (ex: 🚀, 🛡️, ⏱️, 🔢, 📜, 💡, 🏓) quando houver um emoji Vanta correspondente.
+> - **MANDATO DE AUSÊNCIA DE EMOJI (OBRIGATÓRIO)**: Se uma nova funcionalidade, comando, botão ou modal exigir um ícone/emoji que **NÃO conste no catálogo de 59 emojis**, a IA **NUNCA DEVE IMPROVISAR** com emojis genéricos. A IA **DEVE PARAR E PEDIR AO OPERADOR** fornecendo a descrição visual detalhada e propósito do emoji necessário.
 
 ---
 
@@ -36,6 +45,7 @@
 > 4. **DEPOIS de concluir**: atualize este arquivo incrementando a versão (`[Update #XXX]`), detalhando o que foi feito e listando os arquivos modificados.
 > 5. **REGRA MANDATÓRIA DE COMANDOS**: **SEMPRE atualizar e verificar o comando `/help` a cada novo comando criado**. O `/help` possui auto-descoberta dinâmica de comandos registrados e catálogo de metadados visuais (`COMMAND_METADATA`). Todo novo comando deve ser integrado e documentado.
 > 6. **BLINDAGEM DE PRIVACIDADE**: **NUNCA vazar dados de backend para usuários finais**. Portas, tecnologias de servidor e dados internos são mantidos em segredo estrito de desenvolvimento.
+> 7. **LEI DOS EMOJIS PERSONALIZADOS**: **USO EXCLUSIVO dos 59 emojis personalizados oficiais** de `constants.json`. Se faltar um emoji necessário para qualquer recurso, **SEMPRE peça ao operador com descrição detalhada** em vez de improvisar com emojis Unicode.
 
 ---
 
@@ -166,7 +176,38 @@ Porta padrão: `8080`.
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
 
-### [Update #015] — Blindagem Anti-Timeout do /help (deferReply Imediato & Cache Pre-Warm)
+### [Update #016] — Implementação do Catálogo Oficial de 59 Emojis & Lei Mandatória de Emojis
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. **Catálogo Oficial de 59 Emojis**:
+     - Mapeados e extraídos todos os 59 emojis temáticos fornecidos a partir do servidor oficial `vh.dog`.
+     - Injetados de forma imutável e estruturada em [constants.json](file:///c:/Users/pc/Documents/Vanta%20Bot/constants.json) sob `constants.emojis.*`.
+     - Criado o módulo utilitário tipado [src/functions/emojis.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/functions/emojis.ts) com funções `getEmoji(name)` e `getEmojiId(name)` para uso simplificado em Markdown e botões.
+  2. **Atualização Completa dos Comandos e Responders**:
+     - [src/discord/commands/public/help.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/commands/public/help.ts): Título com `Logovanta`, botão com `estrela`, comandos com `bussola`, `ping` e `coins`, listagem com `lsita`, suporte com `informacao`, status com `ativo`, segurança com `protegidocomsucesso` e rodapé com `lampada`.
+     - [src/discord/commands/public/ping.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/commands/public/ping.ts): Título com `ping`, botão com `relogio` e rodapé com `Logovanta`.
+     - [src/discord/commands/public/counter.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/commands/public/counter.ts): Título com `coins`, botão reset com `repitaoutroca`, botão + com `mais` e botão - com `menos`.
+     - [src/discord/responders/buttons/remind.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/responders/buttons/remind.ts): Título com `relogio`, confirmação com `confirmado` e rodapé com `ativo`.
+     - [src/discord/responders/buttons/verify.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/responders/buttons/verify.ts): Título com `protegidocomsucesso`, boas-vindas com `ola`, botão link com `foguete`, auditoria com `relogio` e aviso com `atencao`.
+     - [src/functions/verification.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/functions/verification.ts) e [src/database/functions/verification.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/database/functions/verification.ts): Painel padrão com `Logovanta` e `protegidocomsucesso`.
+  3. **Promulgação da Lei dos Emojis Personalizados na Skill e Ledger**:
+     - Atualizada a skill de governança `vantinha-project-ledger` (`SKILL.md`) tornando proibido o uso de emojis Unicode genéricos.
+     - **Regra Sagrada de Ausência**: Caso um novo comando ou recurso precise de um emoji e ele não conste entre os 59 oficiais, a IA **DEVE PARAR E PEDIR AO OPERADOR** fornecendo a descrição visual detalhada e propósito, proibindo terminantemente a improvisação.
+  4. Validação completa via `npm run check` com 0 erros e verificação do watch mode sem interrupções.
+- **Arquivos Criados / Modificados**:
+  - `constants.json` (59 emojis cadastrados)
+  - `src/functions/emojis.ts` (criado)
+  - `src/functions/index.ts` (exportação de emojis)
+  - `src/discord/commands/public/help.ts`
+  - `src/discord/commands/public/ping.ts`
+  - `src/discord/commands/public/counter.ts`
+  - `src/discord/responders/buttons/remind.ts`
+  - `src/discord/responders/buttons/verify.ts`
+  - `src/functions/verification.ts`
+  - `src/database/functions/verification.ts`
+  - `C:\Users\pc\.gemini\config\skills\vantinha-project-ledger\SKILL.md` (regra e tabela de 59 emojis)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.2.0`)
 - **Data**: 2026-11-13
 - **Autor / Agente**: Antigravity & Usuário
 - **Resumo da Entrega**:

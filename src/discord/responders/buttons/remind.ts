@@ -17,17 +17,17 @@ createResponder({
         const container = createContainer(
             constants.colors.success,
             createSection(
-                `### ⏱️ Ponto Registrado!\nComando executado ${time(date, "R")} (${time(date, "F")}).`,
+                `### ${constants.emojis.relogio} Ponto Registrado!\nComando executado ${time(date, "R")} (${time(date, "F")}).`,
                 new ButtonBuilder({
                     customId: "remind/confirm",
                     label: "Confirmado",
                     style: ButtonStyle.Success,
                     disabled: true,
-                    emoji: "✅"
+                    emoji: constants.emojis.confirmado
                 })
             ),
             Separator.Default,
-            createTextDisplay("Operação concluída com sucesso no cluster Vanta.")
+            createTextDisplay(`${constants.emojis.ativo} Operação concluída com sucesso no cluster Vanta.`)
         );
 
         await interaction.reply({

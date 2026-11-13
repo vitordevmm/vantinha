@@ -30,10 +30,11 @@ function counterMenu<R>(current: number): R {
     const container = createContainer(
         constants.colors.vantaAccent,
         createSection(
-            `## 🌌 Contador Vantinha: \` ${current} \``,
+            `## ${constants.emojis.coins} Contador Vantinha: \` ${current} \``,
             new ButtonBuilder({
                 customId: "counter/0",
                 label: "Resetar",
+                emoji: constants.emojis.repitaoutroca,
                 disabled: current === 0,
                 style:
                     current > 0 ? ButtonStyle.Primary :
@@ -47,6 +48,7 @@ function counterMenu<R>(current: number): R {
             new ButtonBuilder({
                 customId: `counter/${current + 1}`,
                 label: "+",
+                emoji: constants.emojis.mais,
                 style: ButtonStyle.Success
             }),
         ),
@@ -55,6 +57,7 @@ function counterMenu<R>(current: number): R {
             new ButtonBuilder({
                 customId: `counter/${current - 1}`,
                 label: "-",
+                emoji: constants.emojis.menos,
                 style: ButtonStyle.Danger
             }),
         ),

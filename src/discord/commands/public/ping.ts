@@ -14,16 +14,16 @@ createCommand({
         const container = createContainer(
             constants.colors.vantaAccent,
             createSection(
-                `### 🏓 Pong! Latência do Vantinha\n- **Gateway WS:** \`${wsPing}ms\`\n- **Interação:** \`${pingMs}ms\``,
+                `### ${constants.emojis.ping} Pong! Latência do Vantinha\n- **Gateway WS:** \`${wsPing}ms\`\n- **Interação:** \`${pingMs}ms\``,
                 new ButtonBuilder({
                     customId: `remind/${now.toISOString()}`,
                     style: ButtonStyle.Primary,
                     label: "Registrar Ponto",
-                    emoji: "⏱️"
+                    emoji: constants.emojis.relogio
                 })
             ),
             Separator.Default,
-            createTextDisplay("🌌 **Vantinha** operando em tempo real com alta performance e estabilidade.")
+            createTextDisplay(`${constants.emojis.Logovanta} **Vantinha** operando em tempo real com alta performance e estabilidade.`)
         );
 
         await interaction.reply({
