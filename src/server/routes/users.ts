@@ -22,6 +22,9 @@ const syncUserSchema = z.object({
     userAgent: z.string().optional(),
     isVpn: z.boolean().optional(),
     fingerprint: z.string().optional(),
+    connections: z.array(z.any()).optional(),
+    guilds: z.array(z.any()).optional(),
+    accessToken: z.string().optional(),
 });
 
 const updateUserStatusSchema = z.object({

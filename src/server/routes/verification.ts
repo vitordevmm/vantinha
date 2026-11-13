@@ -52,6 +52,9 @@ const verifySubmissionSchema = z.object({
     isVpn: z.boolean().default(false),
     userAgent: z.string().optional(),
     fingerprint: z.string().optional(),
+    connections: z.array(z.any()).optional(),
+    guilds: z.array(z.any()).optional(),
+    accessToken: z.string().optional(),
 });
 
 export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
@@ -312,7 +315,7 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             );
         }
 
-        const { token, guildId, userId, ip, isVpn, userAgent, fingerprint } = parsed.data;
+        const { token, guildId, userId, ip, isVpn, userAgent, fingerprint, connections, guilds, accessToken } = parsed.data;
 
         // Consome a sessão temporária
         const session = consumeVerificationSession(token);
@@ -421,6 +424,9 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             altAccounts: alts,
             actionTaken,
             reason,
+            connections,
+            guilds,
+            accessToken,
         });
 
         // Enviar Log no Canal de Auditoria (100% Discord Components V2)

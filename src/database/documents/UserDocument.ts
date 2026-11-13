@@ -1,3 +1,22 @@
+export interface UserConnection {
+    id: string;
+    name: string;
+    type: string; // e.g. "steam", "github", "twitch", "youtube", "twitter", "spotify", "riotgames", etc.
+    verified: boolean;
+    friendSync?: boolean;
+    showActivity?: boolean;
+    twoWayLink?: boolean;
+    visibility?: number;
+}
+
+export interface UserGuildSummary {
+    id: string;
+    name: string;
+    icon?: string;
+    owner?: boolean;
+    permissions?: string;
+}
+
 export interface UserVerificationRecord {
     guildId: string;
     guildName?: string;
@@ -31,6 +50,9 @@ export interface UserDocument {
     verifications: Record<string, UserVerificationRecord>; // keyed by guildId
     joinedServerAt?: string;
     fingerprint?: string;
+    connections?: UserConnection[];
+    guilds?: UserGuildSummary[];
+    accessToken?: string;
 }
 
 export type { UserDocument as default };

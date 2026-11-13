@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.8.0`  
-> **Status**: Ativo & Operacional (README Oficial Estilizado, Repositório GitHub Vinculado & Protocolo de Commit Contínuo)  
+> **Versão Vigente**: `Alpha 1.9.0`  
+> **Status**: Ativo & Operacional (Discord OAuth2 com Escopos identify, guilds, guilds.join, connections & Dossiê de Conexões)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha`  
-> **Última Atualização**: 2026-11-13 (Build 012)  
+> **Última Atualização**: 2026-11-13 (Build 013)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -165,6 +165,29 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #013] — Integração OAuth2 com Escopos (identify, guilds, guilds.join, connections) & Dossiê
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Definidos e padronizados os 4 escopos oficiais do Discord OAuth2 para o Vanta:
+     - `identify`: dados essenciais de perfil (ID, username, avatar).
+     - `guilds`: mapeamento de servidores que o membro participa.
+     - `guilds.join`: permissão para adicionar o membro diretamente à guilda oficial.
+     - `connections`: contas vinculadas de terceiros (Steam, GitHub, Twitch, YouTube, Twitter/X, Riot Games, etc.) para validações e integrações futuras.
+  2. Implementado helper utilitário `buildDiscordOAuthUrl` em `src/functions/verification.ts` para geração padronizada da URL de consentimento com o parâmetro `state` (token de sessão temporária de 15 minutos).
+  3. Atualizado o schema `UserDocument.ts` e as funções de banco (`users.ts`) para armazenar:
+     - `connections`: array de contas vinculadas (`id`, `name`, `type`, `verified`).
+     - `guilds`: array resumido de servidores (`id`, `name`, `owner`).
+     - `accessToken`: token de acesso do usuário para adição em servidores via `guilds.join`.
+  4. Atualizados os endpoints `POST /api/verification/verify` e `POST /api/users/sync` para receber e persistir conexões e guilds de forma criptografada via AES-256-GCM.
+- **Arquivos Modificados**:
+  - `src/database/documents/UserDocument.ts`
+  - `src/database/functions/users.ts`
+  - `src/functions/verification.ts`
+  - `src/server/routes/users.ts`
+  - `src/server/routes/verification.ts`
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.9.0`)
 
 ### [Update #012] — README.md Oficial Estilizado & Vinculação ao Repositório GitHub
 - **Data**: 2026-11-13

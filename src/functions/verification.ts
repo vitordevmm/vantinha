@@ -84,3 +84,41 @@ export function buildVerificationPanel(config: GuildVerificationConfig): Message
         components: [container],
     };
 }
+
+/**
+ * Escopos oficiais obrigatórios de autorização OAuth2 do Vanta
+ */
+export const DISCORD_OAUTH_SCOPES = [
+    "identify",
+    "guilds",
+    "guilds.join",
+    "connections"
+] as const;
+
+export interface BuildOAuthUrlParams {
+    clientId: string;
+    redirectUri: string;
+    state?: string;
+    prompt?: "consent" | "none";
+}
+
+/**
+ * Constrói o link oficial do Discord OAuth2 com os 4 escopos configurados:
+ * identify, guilds, guilds.join e connections.
+ */
+export function buildDiscordOAuthUrl(params: BuildOAuthUrlParams): string {
+    const { clientId, redirectUri, state, prompt = "consent" } = params;
+    const query = new URLSearchParams({
+        client_id: clientId,
+        response_type: "code",
+        redirect_uri: redirectUri,
+        scope: DISCORD_OAUTH_SCOPES.join(" "),
+        prompt,
+    });
+
+    if (state) {
+        query.set("state", state);
+    }
+
+    return `https://discord.com/oauth2/authorize?${query.toString()}`;
+}

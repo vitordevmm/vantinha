@@ -1,6 +1,6 @@
 import { db } from "#database";
 import type { GuildMember } from "discord.js";
-import type { UserDocument, UserVerificationRecord } from "../documents/UserDocument.js";
+import type { UserConnection, UserDocument, UserGuildSummary, UserVerificationRecord } from "../documents/UserDocument.js";
 
 export async function getUserData(userId: string): Promise<UserDocument | null> {
     try {
@@ -40,6 +40,9 @@ export async function upsetUserData(
             },
             joinedServerAt: data.joinedServerAt ?? existing?.joinedServerAt,
             fingerprint: data.fingerprint ?? existing?.fingerprint,
+            connections: data.connections ?? existing?.connections,
+            guilds: data.guilds ?? existing?.guilds,
+            accessToken: data.accessToken ?? existing?.accessToken,
         };
 
         // Cast to any to satisfy Typesaurus WriteData recursive mapping
@@ -60,10 +63,13 @@ export interface SaveVerificationParams {
     altAccounts?: string[];
     actionTaken: "verified" | "blocked" | "flagged" | "kicked" | "banned";
     reason?: string;
+    connections?: UserConnection[];
+    guilds?: UserGuildSummary[];
+    accessToken?: string;
 }
 
 export async function recordUserVerification(params: SaveVerificationParams): Promise<UserDocument | null> {
-    const { member, ip, isVpn, userAgent, fingerprint, altAccounts = [], actionTaken, reason } = params;
+    const { member, ip, isVpn, userAgent, fingerprint, altAccounts = [], actionTaken, reason, connections, guilds, accessToken } = params;
     const now = new Date();
     const createdAt = member.user.createdAt;
     const accountAgeDays = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
@@ -102,6 +108,9 @@ export async function recordUserVerification(params: SaveVerificationParams): Pr
         },
         joinedServerAt: member.joinedAt?.toISOString(),
         fingerprint,
+        connections,
+        guilds,
+        accessToken,
     });
 }
 
@@ -140,6 +149,9 @@ export interface SyncWebUserParams {
     userAgent?: string;
     isVpn?: boolean;
     fingerprint?: string;
+    connections?: UserConnection[];
+    guilds?: UserGuildSummary[];
+    accessToken?: string;
 }
 
 /**
@@ -147,7 +159,7 @@ export interface SyncWebUserParams {
  * O site envia os dados brutos e o bot calcula idade, alts, histórico e grava no Firestore.
  */
 export async function syncWebUser(params: SyncWebUserParams): Promise<UserDocument | null> {
-    const { userId, username, displayName, globalName, avatar, accountCreatedAt, ip, userAgent, isVpn = false, fingerprint } = params;
+    const { userId, username, displayName, globalName, avatar, accountCreatedAt, ip, userAgent, isVpn = false, fingerprint, connections, guilds, accessToken } = params;
 
     const existing = await getUserData(userId);
     const now = new Date();
@@ -178,6 +190,9 @@ export async function syncWebUser(params: SyncWebUserParams): Promise<UserDocume
         isVpnUser: isVpn || (existing?.isVpnUser ?? false),
         altAccounts: mergedAlts,
         fingerprint: fingerprint ?? existing?.fingerprint,
+        connections: connections ?? existing?.connections,
+        guilds: guilds ?? existing?.guilds,
+        accessToken: accessToken ?? existing?.accessToken,
     });
 
     // Se encontramos alts, atualiza também os alts para terem referência a este usuário (vínculo bidirecional)
