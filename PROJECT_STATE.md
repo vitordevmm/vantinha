@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 2.2.0`  
-> **Status**: Ativo & Operacional (Catálogo de 59 Emojis Oficiais Vanta Ativo & Lei Mandatória de Emojis)  
+> **Versão Vigente**: `Alpha 2.3.0`  
+> **Status**: Ativo & Operacional (Licença Anti-Plágio Estrita, Documentação Multi-Idioma PT-BR/EN/ES & 59 Emojis Oficiais)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
-> **Última Atualização**: 2026-11-13 (Build 016)  
+> **Última Atualização**: 2026-11-13 (Build 017)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -176,6 +176,28 @@ Porta padrão: `8080`.
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
 
+### [Update #017] — Licença Anti-Plágio Estrita (All Rights Reserved) & Documentação Multi-Idioma (PT-BR, EN, ES) no GitHub
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. **Licença Anti-Plágio & Propriedade Intelectual ([LICENSE](LICENSE))**:
+     - Criado documento de licença proprietária de software estrita (`ALL RIGHTS RESERVED`) em nome de **Vitor Dev (vitordevmm) & Vanta Ecosystem**.
+     - Proibição explícita e categórica de plágio: proibido alegar autoria, remover créditos/marcas, renomear ou redistribuir o código ou seus derivados como produto próprio.
+     - Proibição de redistribuição comercial e não-comercial, venda, espelhamento, clonagem e engenharia reversa das camadas criptográficas (AES-256-GCM) e arquitetura de verificação.
+     - Atualizado o [package.json](package.json) com o descritor padrão `"license": "SEE LICENSE IN LICENSE"`.
+  2. **Documentação Multi-Idioma Completa no GitHub**:
+     - **Português (PT-BR)** ([README.md](README.md)): Atualizado com seletores rápidos de idioma no topo (`🇧🇷 Português • 🇺🇸 English • 🇪🇸 Español`), badge da licença proprietária anti-plágio e seção detalhada de propriedade intelectual.
+     - **Inglês (EN)** ([README.en.md](README.en.md)): Documentação técnica completa em inglês, cobrindo visão geral, recursos (Components V2, AES-256-GCM, Fastify, detecção de Alts/VPN, 59 emojis), árvore de arquitetura, stack, setup local com `.env` e diretrizes de governança.
+     - **Espanhol (ES)** ([README.es.md](README.es.md)): Documentação técnica completa em espanhol com diagramas de árvore, guias de execução local, tabela de endpoints e regras estritas de UI e sigilo de backend.
+  3. Checagem de tipagem executada com sucesso (`npm run check` -> `✔ Ok`).
+- **Arquivos Criados / Modificados**:
+  - `LICENSE` (criado com termos estritos anti-plágio)
+  - `package.json` (adicionado campo license)
+  - `README.md` (seletores de idioma, badge de licença e seção jurídica)
+  - `README.en.md` (criado em inglês)
+  - `README.es.md` (criado em espanhol)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.3.0`)
+
 ### [Update #016] — Implementação do Catálogo Oficial de 59 Emojis & Lei Mandatória de Emojis
 - **Data**: 2026-11-13
 - **Autor / Agente**: Antigravity & Usuário
@@ -208,6 +230,8 @@ Porta padrão: `8080`.
   - `src/database/functions/verification.ts`
   - `C:\Users\pc\.gemini\config\skills\vantinha-project-ledger\SKILL.md` (regra e tabela de 59 emojis)
   - `PROJECT_STATE.md` (versão elevada para `Alpha 2.2.0`)
+
+### [Update #015] — Blindagem Anti-Timeout do /help (deferReply Imediato & Cache Pre-Warm)
 - **Data**: 2026-11-13
 - **Autor / Agente**: Antigravity & Usuário
 - **Resumo da Entrega**:

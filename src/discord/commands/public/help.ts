@@ -15,7 +15,7 @@ createCommand({
     type: ApplicationCommandType.ChatInput,
     async run(interaction) {
         // 1. Resposta diferida imediata para anular qualquer risco de timeout (3s) do Discord
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         try {
             // 2. Busca do cache em memória (quase instantâneo, 0ms)

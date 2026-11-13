@@ -2,6 +2,7 @@
   "name": "vantinha-bot",
   "version": "1.0.0",
   "description": "Bot oficial do Vanta (Vantinha) baseado em Constatic, Discord Components V2, Firestore e Fastify API",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "main": "build/index.js",
   "scripts": {

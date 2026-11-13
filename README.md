@@ -6,6 +6,12 @@
   <b>Assistente inteligente de alta performance, gateway de segurança, verificação e automação oficial do Vanta.</b>
 </p>
 
+<p align="center">
+  <a href="README.md"><b>🇧🇷 Português</b></a> •
+  <a href="README.en.md"><b>🇺🇸 English</b></a> •
+  <a href="README.es.md"><b>🇪🇸 Español</b></a>
+</p>
+
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Constatic](https://img.shields.io/badge/Constatic-Base%200.1.3-7c3aed?style=for-the-badge&logo=rocket&logoColor=white)](https://constatic-docs.vercel.app/)
@@ -14,6 +20,7 @@
 [![Fastify](https://img.shields.io/badge/API-Fastify%205+-000000?style=for-the-badge&logo=fastify&logoColor=white)](https://fastify.dev/)
 [![Firestore](https://img.shields.io/badge/Database-Cloud%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![Security](https://img.shields.io/badge/Security-AES--256--GCM%20E2E-06b6d4?style=for-the-badge&logo=shield&logoColor=white)](#-camada-de-segurança-e-criptografia-e2e)
+[![License](https://img.shields.io/badge/License-Proprietary%20%2F%20Anti--Plagiarism-red?style=for-the-badge&logo=lock&logoColor=white)](LICENSE)
 
 ---
 
@@ -166,6 +173,17 @@ O desenvolvimento deste bot segue o protocolo rigoroso do [PROJECT_STATE.md](fil
 3. Auditoria ativa do terminal nos primeiros 10 segundos pós-inicialização.
 4. Registro de atualização enumerada (`[Update #XXX]`) com descrição detalhada dos arquivos modificados.
 5. Cumprimento estrito da **Lei Suprema de UI: 100% Discord Components V2** e da **Lei de Sigilo de Backend** (zero vazamento de portas e dados internos aos usuários finais).
+6. Cumprimento estrito da **Lei dos Emojis Personalizados** (uso exclusivo dos 59 emojis oficiais de `constants.json`).
+
+---
+
+## ⚖️ Licença & Propriedade Intelectual (Anti-Plágio)
+
+Este projeto está protegido sob uma **Licença Proprietária e Anti-Plágio Estrita** (`ALL RIGHTS RESERVED`).
+- **Copyright (c) 2026 Vitor Dev (vitordevmm) & Vanta Ecosystem**.
+- É **estritamente proibido** copiar, plagiar, duplicar, redistribuir, sublicenciar ou comercializar qualquer trecho deste código, arquitetura ou artefatos visuais sob outro nome sem autorização prévia por escrito do autor.
+- O código-fonte neste repositório é disponibilizado unicamente para fins de transparência, visualização e auditoria.
+- Para detalhes legais completos, consulte o arquivo [LICENSE](LICENSE).
 
 ---
 
