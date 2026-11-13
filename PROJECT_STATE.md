@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.1.0`  
-> **Status**: Ativo & Operacional (Sistema de Verificação com API Fastify & Components V2)  
+> **Versão Vigente**: `Alpha 1.2.0`  
+> **Status**: Ativo & Operacional (Sistema de Verificação, UserDocument & API Fastify)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 005)  
+> **Última Atualização**: 2026-11-13 (Build 006)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -32,7 +32,7 @@
 - **ID do Bot**: `1567751920645308548`
 - **Repositório / Workspace**: `c:\Users\pc\Documents\Vanta Bot`
 - **Token do Discord**: Armazenado com segurança exclusivamente no arquivo `.env` (variável `BOT_TOKEN`), validado em `src/env.ts`.
-- **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Chave do Service Account em `firebase.json` (variável `FIREBASE_PATH`).
+- **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Coleções: `guilds`, `guilds/:id/members` e `users`.
 - **Servidor Web API**: Fastify rodando na porta `8080` (variável `SERVER_PORT`) para comunicação bidirecional com o futuro site/dashboard do Vanta.
 - **Segurança da API**: Chave secreta `API_SECRET_KEY` configurada no `.env` (validação via header `x-api-key`).
 - **Framework Base**: `constatic` (`@constatic/base` + `@magicyan/discord`).
@@ -78,14 +78,16 @@ Vanta Bot/
     ├── env.ts               # Validação Zod com DASHBOARD_URL e API_SECRET_KEY
     ├── index.ts             # Ponto de entrada que executa o bootstrap do Constatic
     ├── database/            # Camada de persistência Firestore via Typesaurus
-    │   ├── index.ts         # Inicialização segura do Firebase Admin e schema
+    │   ├── index.ts         # Inicialização segura do Firebase Admin e coleções (guilds, users)
     │   ├── documents/       # Tipagens dos documentos
     │   │   ├── GuildDocument.ts   # Documento da guilda com schema de verificação e logs
-    │   │   └── MemberDocument.ts  # Documento do membro (xp, moedas, etc.)
-    │   └── functions/       # Funções utilitárias de CRUD (guilds, members, verification)
+    │   │   ├── MemberDocument.ts  # Documento do membro (xp, moedas, etc.)
+    │   │   └── UserDocument.ts    # Documento global do usuário (IPs, idade da conta, alts, auditoria)
+    │   └── functions/       # Funções utilitárias de CRUD (guilds, members, verification, users)
     │       ├── guilds.ts    # getGuildData, upsetGuildData, updateGuildData
     │       ├── members.ts   # getMemberData, upsetMemberData, updateMemberData
-    │       └── verification.ts # getVerificationConfig, saveVerificationConfig, findAltsByIp
+    │       ├── verification.ts # getVerificationConfig, saveVerificationConfig, findAltsByIp
+    │       └── users.ts     # getUserData, upsetUserData, recordUserVerification
     ├── discord/             # Módulos Discord auto-carregados pelo Constatic
     │   ├── index.ts         # setupCreators() exportando createCommand, createResponder, createEvent
     │   ├── commands/        # Comandos Slash e Context Menus (100% Components V2)
@@ -109,7 +111,7 @@ Vanta Bot/
         └── routes/          # Rotas HTTP estruturadas
             ├── index.ts     # Registro centralizador de rotas
             ├── home.ts      # Rota GET / e GET /api/guilds (seletor de servidores)
-            └── verification.ts # Endpoints completos de verificação, configs e auditoria
+            └── verification.ts # Endpoints completos de verificação, logs e perfil do usuário (/api/users/:userId)
 ```
 
 ---
@@ -128,46 +130,39 @@ Porta padrão: `8080`. Autenticação via header: `x-api-key: <API_SECRET_KEY>`.
 | `PUT` | `/api/guilds/:guildId/verification` | **Sim** | Salva/atualiza configurações (canais, cargos, alts, vpn, UI) |
 | `POST` | `/api/guilds/:guildId/verification/publish` | **Sim** | Envia ou atualiza o painel Components V2 no canal Discord |
 | `GET` | `/api/verification/session/:token` | Não | Valida o token temporário quando o usuário abre o site |
-| `POST` | `/api/verification/verify` | **Sim** | Processa o resultado da verificação (alts, vpn, cargo, logs) |
+| `POST` | `/api/verification/verify` | **Sim** | Processa a verificação, salva no `UserDocument`, entrega cargos e gera logs |
 | `GET` | `/api/guilds/:guildId/verification/logs` | Não | Retorna histórico de auditoria para tabela no site |
+| `GET` | `/api/users/:userId` | Não | Retorna documento completo do usuário (`UserDocument`) |
 
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
 
-### [Update #005] — Sistema Completo de Verificação via Dashboard, API Fastify & Proteção Alts/VPN
+### [Update #006] — Arquitetura de UserDocument & Persistência de Dados Base do Usuário
 - **Data**: 2026-11-13
 - **Autor / Agente**: Antigravity & Usuário
 - **Resumo da Entrega**:
-  1. Criada a arquitetura completa de **Verificação Controlada por Dashboard**:
-     - Suporte a ações configuráveis para contas alternativas/duplicadas (`block`, `kick`, `ban`, `flag`).
-     - Suporte a ações configuráveis para IP suspeito / VPN (`block`, `flag`).
-     - Seleção de canal do painel, canal de logs de auditoria, cargo entregue e cargo removido.
-     - Customização completa visual do painel (título, descrição, cor de destaque hex, label do botão, emoji e rodapé).
-  2. Implementado conjunto de endpoints na API Fastify (`src/server/routes/verification.ts` e `home.ts`):
-     - `GET /api/guilds`: lista servidores ativos.
-     - `GET /api/guilds/:guildId/channels` e `/roles`: alimentam os dropdowns do painel.
-     - `GET` & `PUT /api/guilds/:guildId/verification`: leitura e gravação segura das regras.
-     - `POST /api/guilds/:guildId/verification/publish`: renderiza e publica o painel no Discord em **100% Discord Components V2**.
-     - `GET /api/verification/session/:token`: handshake do usuário na página de verificação.
-     - `POST /api/verification/verify`: validação final de IP, alts e VPN, entrega de cargos no Discord e disparo de logs em Components V2.
-     - `GET /api/guilds/:guildId/verification/logs`: histórico de auditoria.
-  3. Criado responder do botão no Discord em `src/discord/responders/buttons/verify.ts` (`verification/start`), gerando token único de 15 minutos e entregando link efêmero em Components V2.
-  4. Validação de sintaxe `npm run check` com 0 erros e auditoria de logs no watch mode.
+  1. Criado `src/database/documents/UserDocument.ts`:
+     - Armazena o dossiê completo de cada usuário: `userId`, `username`, `displayName`, `globalName`, `avatar`, `accountCreatedAt` (ISO), `accountAgeDays` (idade da conta calculada em dias), `firstSeenAt`, `lastSeenAt`, `lastIp`, `knownIps` (histórico de IPs únicos), `knownUserAgents`, `isVpnUser`, `altAccounts`, `status` (`active`, `flagged`, `banned`), `verifications` (mapeadas por servidor) e `fingerprint`.
+  2. Implementado `src/database/functions/users.ts`:
+     - `getUserData`: Consulta o perfil do usuário no Firestore.
+     - `upsetUserData`: Criação e enriquecimento contínuo com merge sem sobrescrever dados prévios.
+     - `recordUserVerification`: Chamado automaticamente após a submissão de verificação, calculando a idade da conta, guardando novo IP na lista de conhecidos e registrando o histórico de verificação.
+  3. Atualizado o schema central em `src/database/index.ts` adicionando a coleção raiz `users`.
+  4. Integrado na rota `POST /api/verification/verify` para salvar instantaneamente o `UserDocument` a cada tentativa/sucesso de verificação.
+  5. Adicionado novo endpoint `GET /api/users/:userId` para o dashboard inspecionar o dossiê de qualquer membro.
+  6. Checagem de tipos estrita `npm run check` com 0 erros.
 - **Arquivos Criados / Modificados**:
-  - `src/database/documents/GuildDocument.ts` (esquema ampliado)
-  - `src/database/functions/verification.ts` (CRUD de verificação e busca de alts por IP)
-  - `src/database/index.ts` (re-exportação das funções)
-  - `src/functions/verification.ts` (gerador do painel V2 e gerenciador de sessões)
-  - `src/functions/index.ts` (exportação de funções)
-  - `src/discord/responders/buttons/verify.ts` (responder do botão de verificação)
-  - `src/server/routes/verification.ts` (rotas Fastify de verificação)
-  - `src/server/routes/home.ts` (endpoint de listar servidores)
-  - `src/server/routes/index.ts` (registro das rotas)
-  - `src/env.ts`, `.env`, `.env.example` (`DASHBOARD_URL` e `API_SECRET_KEY`)
-  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.1.0`)
+  - `src/database/documents/UserDocument.ts` (criado)
+  - `src/database/functions/users.ts` (criado)
+  - `src/database/index.ts` (esquema `users` adicionado)
+  - `src/server/routes/verification.ts` (integração de salvamento e endpoint `GET /api/users/:userId`)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.2.0`)
 
 ---
+
+### [Update #005] — Sistema Completo de Verificação via Dashboard, API Fastify & Proteção Alts/VPN
+- Criação dos endpoints da API, regras de alts/vpn e painel em Components V2.
 
 ### [Update #004] — Sistema de Presença Temática Rotativa & Comando /help em Components V2
 - Rotação dinâmica de Rich Presence a cada 20 segundos e comando `/help` em Components V2.
@@ -185,6 +180,6 @@ Porta padrão: `8080`. Autenticação via header: `x-api-key: <API_SECRET_KEY>`.
 
 ## 6. Próximos Passos & Roadmap
 
-1. [ ] **Front-end do Dashboard**: Fornecer o prompt pronto com especificações e contratos da API para o usuário construir a interface no site.
+1. [ ] **Front-end do Dashboard**: Instruir e criar as interfaces no site para consumir os endpoints.
 2. [ ] **Chave Real do Firestore**: Inserir arquivo `firebase.json` do Firebase Console para persistência cloud definitiva.
-3. [ ] **Módulos Adicionais**: Sistema de Tickets e Sistema de Moderação via Dashboard.
+3. [ ] **Módulo de Moderação e Auditoria**: Novos endpoints e comandos.

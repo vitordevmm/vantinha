@@ -1,8 +1,10 @@
 import { env } from "#env";
 import {
     findAltsByIp,
+    getUserData,
     getVerificationConfig,
     getVerificationLogs,
+    recordUserVerification,
     recordVerificationLog,
     saveVerificationConfig,
 } from "#database";
@@ -256,7 +258,7 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             });
         }
 
-        const { token, guildId, userId, ip, isVpn, userAgent } = parsed.data;
+        const { token, guildId, userId, ip, isVpn, userAgent, fingerprint } = parsed.data;
 
         // Consome a sessão temporária
         const session = consumeVerificationSession(token);
@@ -348,7 +350,20 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             reason: reason ?? (userAgent ? `Navegador: ${userAgent.slice(0, 50)}` : undefined),
         };
 
+        // 1. Gravar Log no Histórico da Guilda
         await recordVerificationLog(guildId, logEntry);
+
+        // 2. Gravar e enriquecer os dados base no UserDocument
+        await recordUserVerification({
+            member,
+            ip,
+            isVpn,
+            userAgent,
+            fingerprint,
+            altAccounts: alts,
+            actionTaken,
+            reason,
+        });
 
         // Enviar Log no Canal de Auditoria (100% Discord Components V2)
         if (config.logChannelId) {
@@ -398,5 +413,19 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
         const { guildId } = req.params as { guildId: string };
         const logs = await getVerificationLogs(guildId);
         return res.status(StatusCodes.OK).send({ logs });
+    });
+
+    // 9. Obter Dados Base de um Usuário (UserDocument) para o Dashboard (GET /api/users/:userId)
+    app.get("/api/users/:userId", async (req, res) => {
+        const { userId } = req.params as { userId: string };
+        const userDoc = await getUserData(userId);
+
+        if (!userDoc) {
+            return res.status(StatusCodes.NOT_FOUND).send({
+                error: "Usuário não encontrado no banco de dados",
+            });
+        }
+
+        return res.status(StatusCodes.OK).send({ user: userDoc });
     });
 }
