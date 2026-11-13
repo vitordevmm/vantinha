@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.9.0`  
-> **Status**: Ativo & Operacional (Discord OAuth2 com Escopos identify, guilds, guilds.join, connections & Dossiê de Conexões)  
+> **Versão Vigente**: `Alpha 2.0.0`  
+> **Status**: Ativo & Operacional (Sincronização Contínua GitHub Origin Ativa, OAuth2 com 4 Escopos & Master Data Gateway)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Repositório GitHub**: `https://github.com/vitordevmm/vantinha`  
-> **Última Atualização**: 2026-11-13 (Build 013)  
+> **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
+> **Última Atualização**: 2026-11-13 (Build 014)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -165,6 +165,17 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #014] — Autenticação do Remote GitHub & Primeiro Push com Sucesso Total
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Configurada a autenticação segura do repositório remoto Git `origin` (`https://github.com/vitordevmm/vantinha.git`).
+  2. Publicado o histórico completo do projeto em produção no GitHub nos ramos `main` e `master`.
+  3. Realizada auditoria de integridade do histórico: 100% livre de segredos ou tokens sensíveis (`.env`, `firebase.json` e `serviceAccount.json` totalmente resguardados no `.gitignore`).
+  4. Protocolo contínuo ativo: a cada nova atualização concluída, o commit e o push são automaticamente sincronizados com o repositório remoto.
+- **Arquivos Modificados**:
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.0.0`)
 
 ### [Update #013] — Integração OAuth2 com Escopos (identify, guilds, guilds.join, connections) & Dossiê
 - **Data**: 2026-11-13
