@@ -1,10 +1,19 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.0.0`  
+> **Versão Vigente**: `Alpha 1.0.1`  
 > **Status**: Ativo & Operacional (Base Constatic + Discord Components V2 + Firestore + Fastify API)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 001)  
+> **Última Atualização**: 2026-11-13 (Build 002)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
+
+---
+
+> [!CAUTION]
+> ### 🛡️ LEI SUPREMA DE UI DO VANTINHA: 100% DISCORD COMPONENTS V2
+> **O Vantinha só usa Discord Components V2 — NADA inferior a isso é permitido.**
+> - É **terminantemente proibido** utilizar Embeds legadas (`EmbedBuilder` como casca de resposta) ou Action Rows soltas da API v13/v14 antiga.
+> - **100% das mensagens, comandos, painéis, modais e respostas interativas** devem ser construídas através de **`createContainer` / `ContainerPlusBuilder`**, estruturadas com `createSection`, `Separator`, `createTextDisplay`, `createThumbnail`, `createMediaGallery`, `createFile` e controles modernos (Checkbox, Radio, FileUpload).
+> - **Obrigatório em todas as respostas**: inclusão da flag `flags: ["IsComponentsV2"]` (ou `flags: ["Ephemeral", "IsComponentsV2"]`).
 
 ---
 
@@ -29,7 +38,7 @@
 
 ## 2. Paleta de Cores Oficial (`constants.json`)
 
-Toda interface visual do Vantinha (seja em Containers V2 ou Embeds) deve seguir estritamente os tokens de cor declarados em `constants.json`:
+Toda interface visual do Vantinha (containers e seções) deve seguir estritamente os tokens de cor declarados em `constants.json`:
 
 | Nome do Token | Hexadecimal | Uso Principal |
 | :--- | :--- | :--- |
@@ -75,13 +84,13 @@ Vanta Bot/
     │       └── members.ts   # getMemberData, upsetMemberData, updateMemberData
     ├── discord/             # Módulos Discord auto-carregados pelo Constatic
     │   ├── index.ts         # setupCreators() exportando createCommand, createResponder, createEvent
-    │   ├── commands/        # Comandos Slash e Context Menus
+    │   ├── commands/        # Comandos Slash e Context Menus (100% Components V2)
     │   │   └── public/
     │   │       ├── counter.ts # Exemplo interativo com Discord Components V2
-    │   │       └── ping.ts    # Latência WebSocket e gateway com card V2
+    │   │       └── ping.ts    # Latência WebSocket e gateway com container V2
     │   ├── responders/      # Ouvintes de botões, selects e modais com radix router
     │   │   └── buttons/
-    │   │       └── remind.ts  # Responder do botão de ping com validação de params
+    │   │       └── remind.ts  # Responder do botão de ping com container V2
     │   └── events/          # Ouvintes de eventos do Discord.js
     │       ├── ready.ts     # Log personalizado de inicialização do Vantinha
     │       └── sample.ts    # Template para novos eventos
@@ -99,24 +108,40 @@ Vanta Bot/
 ## 4. Boas Práticas & Diretrizes de Desenvolvimento
 
 ### ✅ O QUE FAZER:
-1. **Subpath Imports Obrigatórios**: Utilize sempre `#env`, `#base`, `#database`, `#server`, `#functions` em vez de caminhos relativos profundos.
-2. **Discord Components V2**: Use sempre `createContainer`, `createSection`, `createTextDisplay` e `Separator` com a flag `flags: ["IsComponentsV2"]` (ou `["Ephemeral", "IsComponentsV2"]`).
-3. **Verbatim Module Syntax**: Escreva `import type { ... }` para tipos e `export type { ... }` para re-exportar interfaces para manter compatibilidade com o TypeScript configurado.
-4. **Radix Routing com `createResponder`**: Use `customId: "acao/:param1/:param2"` e use o callback `parse` para deserializar e validar os parâmetros.
-5. **Fail-Fast no .env**: Qualquer nova variável de ambiente obrigatória deve ser tipada no schema do Zod em `src/env.ts`.
-6. **Checagem de Tipos Estrita**: Antes de concluir qualquer tarefa, rode `npm run check` (`tsc --noEmit`) para validar 100% de conformidade de tipos.
+1. **100% DISCORD COMPONENTS V2 EM TUDO**: Todas as respostas de interação, mensagens e interfaces DEVEM utilizar `createContainer(...)` com a flag `IsComponentsV2`.
+2. **Subpath Imports Obrigatórios**: Utilize sempre `#env`, `#base`, `#database`, `#server`, `#functions` em vez de caminhos relativos profundos.
+3. **Estruturação Visual Moderna**: Utilize `createSection` (com botões ou thumbnails como acessórios), `createTextDisplay` para blocos informativos e `Separator` para ritmo visual.
+4. **Verbatim Module Syntax**: Escreva `import type { ... }` para tipos e `export type { ... }` para re-exportar interfaces.
+5. **Radix Routing com `createResponder`**: Use `customId: "acao/:param1/:param2"` e use o callback `parse` para deserializar e validar os parâmetros.
+6. **Fail-Fast no .env**: Qualquer nova variável de ambiente obrigatória deve ser tipada no schema do Zod em `src/env.ts`.
+7. **Checagem de Tipos Estrita**: Antes de concluir qualquer tarefa, rode `npm run check` (`tsc --noEmit`) para validar 100% de conformidade de tipos.
 
 ### ❌ O QUE NÃO FAZER:
-1. **NÃO altere o código sem atualizar este arquivo (`PROJECT_STATE.md`)**.
-2. **NÃO comite nem exponha tokens ou chaves privadas**.
-3. **NÃO utilize caminhos relativos como `../../../../`**.
-4. **NÃO crie ouvintes de interação manuais** fora do padrão `createResponder`.
-5. **NÃO faça split manual de strings em customId** (`customId.split("_")`).
-6. **NÃO passe apenas uma string para `createSection` sem acessório**: Se não houver acessório (botão ou thumbnail), use `createTextDisplay("...")` ou `createSection({ content: "..." })`.
+1. **NUNCA usar Embeds legadas (`EmbedBuilder`) ou ActionRows isoladas v13/v14**: O Vantinha opera exclusivamente com Components V2.
+2. **NUNCA esquecer a flag `IsComponentsV2`**: O Discord não renderizará a interface se essa flag for omitida.
+3. **NÃO altere o código sem atualizar este arquivo (`PROJECT_STATE.md`)**.
+4. **NÃO comite nem exponha tokens ou chaves privadas**.
+5. **NÃO utilize caminhos relativos como `../../../../`**.
+6. **NÃO crie ouvintes de interação manuais** fora do padrão `createResponder`.
+7. **NÃO faça split manual de strings em customId** (`customId.split("_")`).
+8. **NÃO passe apenas uma string para `createSection` sem acessório**: Se não houver acessório (botão ou thumbnail), use `createTextDisplay("...")` ou `createSection({ content: "..." })`.
 
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #002] — Promulgação da Lei Suprema de UI: 100% Discord Components V2 Exclusivo
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Estabelecida como regra pétrea e irredutível do projeto a exigência de **100% Discord Components V2**: qualquer formato inferior (Embeds convencionais ou Action Rows soltas fora de container) está banido do Vantinha.
+  2. Atualizada a skill de governança `vantinha-project-ledger` para fiscalizar e rejeitar propostas de código que não usem `createContainer` e `IsComponentsV2`.
+  3. Atualizado o ledger `PROJECT_STATE.md` com destaque prioritário da Lei Suprema de UI.
+- **Arquivos Criados / Modificados**:
+  - `PROJECT_STATE.md`: Versão elevada para `Alpha 1.0.1`, inserido callout de alerta crítico e regras consolidadas.
+  - `C:\Users\pc\.gemini\config\skills\vantinha-project-ledger\SKILL.md`: Incluída a exigência pétrea de Components V2 como requisito de conformidade.
+
+---
 
 ### [Update #001] — Fundação, Bootstrap Constatic, Components V2, Firestore & Fastify API
 - **Data**: 2026-11-13
@@ -136,32 +161,17 @@ Vanta Bot/
      - `vantinha-project-ledger`: Protocolo de memória e rastreamento contínuo deste projeto.
 
 - **Arquivos Criados / Modificados**:
-  - `package.json`: Definido nome `vantinha-bot`, dependências `@constatic/base`, `@magicyan/discord`, `fastify`, `@fastify/cors`, `firebase-admin`, `typesaurus`, `zod`.
-  - `tsconfig.json`: Aliases `#env`, `#base`, `#database`, `#server`, `#functions`, `#menus`, `#tools`, `#lib/*`, `#shared/*`.
-  - `.env`: Credenciais configuradas (BOT_TOKEN, BOT_ID, FIREBASE_PATH, SERVER_PORT).
-  - `.env.example`: Template limpo para onboarding.
-  - `constants.json`: Adicionada seção de metadados do bot e paleta Vanta (`vanta`, `vantaDark`, `vantaAccent`, `vantaCyan`).
-  - `src/env.ts`: Validação Zod tipada e estrita com fail-fast.
-  - `src/index.ts`: Importação de `#server` e execução de `bootstrap()`.
-  - `src/database/index.ts`: Inicialização segura do Firebase Admin com tratamento para placeholder e schema Typesaurus.
-  - `src/database/documents/GuildDocument.ts` & `MemberDocument.ts`: Exportação com `export type` para conformidade `verbatimModuleSyntax`.
-  - `src/database/functions/guilds.ts` & `members.ts`: Imports de tipo ajustados.
-  - `src/server/index.ts`: Inicialização do Fastify na porta configurada.
-  - `src/server/routes/home.ts`: Rota HTTP informando dados do Vantinha e estatísticas.
-  - `src/discord/commands/public/counter.ts`: Contador com Discord Components V2 e cor `vantaAccent`.
-  - `src/discord/commands/public/ping.ts`: Ping com latência, botão interativo e container V2.
-  - `src/discord/responders/buttons/remind.ts`: Responder com parâmetros de rota dinâmicos e container V2.
-  - `src/discord/events/ready.ts`: Evento `clientReady` com logger formatado e estilizado.
-  - `C:\Users\pc\.gemini\config\skills\constatic-framework\SKILL.md`: Criada skill de boas práticas do Constatic.
-  - `C:\Users\pc\.gemini\config\skills\discord-components-v2\SKILL.md`: Criada skill de Discord Components V2.
-  - `C:\Users\pc\.gemini\config\skills\vantinha-project-ledger\SKILL.md`: Criada skill de governança contínua.
-  - `PROJECT_STATE.md`: Criado este ledger central.
+  - `package.json`, `tsconfig.json`, `.env`, `.env.example`, `constants.json`.
+  - `src/env.ts`, `src/index.ts`, `src/database/index.ts`, `src/database/documents/*`, `src/database/functions/*`.
+  - `src/server/index.ts`, `src/server/routes/*`.
+  - `src/discord/commands/public/*`, `src/discord/responders/buttons/*`, `src/discord/events/*`.
+  - Skills do usuário em `C:\Users\pc\.gemini\config\skills/`.
+  - `PROJECT_STATE.md`.
 
 ---
 
 ## 6. Próximos Passos & Roadmap
 
-1. [ ] **Chave Real do Firestore**: Quando o operador tiver o arquivo `firebase.json` definitivo do Firebase Console, basta salvá-lo na raiz para ativar a persistência em nuvem.
+1. [ ] **Chave Real do Firestore**: Inserir arquivo `firebase.json` do Firebase Console.
 2. [ ] **Endpoints para o Site**: Desenvolver novas rotas no Fastify (`/api/guilds`, `/api/stats`, `/api/config`) para conectar o site/dashboard ao bot.
-3. [ ] **Sistema de Autenticação / OAuth2**: Preparar endpoints para login com Discord caso o site precise identificar os usuários.
-4. [ ] **Comandos de Gerenciamento do Vanta**: Criar novos comandos de configuração usando Discord Components V2 (menus, botões, modais).
+3. [ ] **Comandos de Gerenciamento do Vanta**: Novos comandos e menus 100% em Discord Components V2.
