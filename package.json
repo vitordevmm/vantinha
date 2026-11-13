@@ -7,10 +7,10 @@
   "scripts": {
     "check": "tsc --noEmit && echo ✔ Ok",
     "build": "tsc",
-    "dev": "tsx --env-file=.env ./src/index.ts",
-    "dev:dev": "tsx --env-file=.env.dev ./src/index.ts",
-    "watch": "tsx --watch --env-file=.env ./src/index.ts",
-    "watch:dev": "tsx --watch --env-file=.env.dev ./src/index.ts",
+    "dev": "node --watch --env-file=.env --import=tsx ./src/index.ts",
+    "dev:dev": "node --watch --env-file=.env.dev --import=tsx ./src/index.ts",
+    "watch": "node --watch --env-file=.env --import=tsx ./src/index.ts",
+    "watch:dev": "node --watch --env-file=.env.dev --import=tsx ./src/index.ts",
     "start": "node --env-file=.env .",
     "start:dev": "node --env-file=.env.dev ."
   },
