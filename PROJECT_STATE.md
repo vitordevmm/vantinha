@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 2.0.0`  
-> **Status**: Ativo & Operacional (Sincronização Contínua GitHub Origin Ativa, OAuth2 com 4 Escopos & Master Data Gateway)  
+> **Versão Vigente**: `Alpha 2.1.0`  
+> **Status**: Ativo & Operacional (Blindagem Anti-Timeout do /help, deferReply Imediato & Cache Pre-Warm)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
-> **Última Atualização**: 2026-11-13 (Build 014)  
+> **Última Atualização**: 2026-11-13 (Build 015)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -165,6 +165,19 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #015] — Blindagem Anti-Timeout do /help (deferReply Imediato & Cache Pre-Warm)
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Identificada a causa do erro *"O aplicativo não respondeu"*: o comando realizava uma busca REST de comandos na API do Discord sem deferimento prévio, vulnerável ao timeout estrito de 3 segundos do Discord caso houvesse latência ou se executado durante um hot-reload.
+  2. Implementado `await interaction.deferReply({ ephemeral: true })` imediatamente no início de [src/discord/commands/public/help.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/commands/public/help.ts), enviando o ACK para o Discord em menos de 50ms e eliminando o risco de timeout para sempre.
+  3. Adicionado pré-aquecimento do cache de comandos em [src/discord/events/ready.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/events/ready.ts) na inicialização (`clientReady`), garantindo que a lista esteja sempre em memória local.
+  4. O container de Discord Components V2 é entregue de forma segura e fluida via `interaction.editReply({ flags: [MessageFlags.IsComponentsV2], components: [container] })`, com fallback resiliente e captura de exceções `try/catch`.
+- **Arquivos Modificados**:
+  - `src/discord/commands/public/help.ts`
+  - `src/discord/events/ready.ts`
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.1.0`)
 
 ### [Update #014] — Autenticação do Remote GitHub & Primeiro Push com Sucesso Total
 - **Data**: 2026-11-13
