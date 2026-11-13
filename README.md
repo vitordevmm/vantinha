@@ -100,72 +100,17 @@ Vanta Bot/
 
 ---
 
-## 🚀 Como Executar Localmente
+## 🔒 Natureza do Repositório & Execução Privada
 
-### Pré-requisitos
-- **Node.js** 22.0.0 ou superior instalado.
-- Chave de Serviço do Firebase (`serviceAccount.json` ou `firebase.json`) com Firestore ativado.
-- Aplicação e Bot criados no [Discord Developer Portal](https://discord.com/developers/applications).
+O **Vantinha** é uma aplicação proprietária de infraestrutura interna do ecossistema **Vanta**.
 
-### 1. Clonar o Repositório
-```bash
-git clone https://github.com/vitordevmm/vantinha.git
-cd vantinha
-```
-
-### 2. Instalar Dependências
-```bash
-npm install
-```
-
-### 3. Configurar as Variáveis de Ambiente
-Crie o arquivo `.env` baseado no modelo [.env.example](file:///.env.example):
-```env
-# Discord Credentials
-BOT_TOKEN="SEU_DISCORD_BOT_TOKEN"
-BOT_ID="1567751920645308548"
-
-# Firestore Database (Caminho do arquivo da Service Account)
-FIREBASE_PATH="./serviceAccount.json"
-
-# API Server Config (Fastify)
-SERVER_PORT=8080
-
-# Dashboard & API Security (Chaves Mestra)
-DASHBOARD_URL="http://localhost:3000"
-API_SECRET_KEY="sua_chave_secreta_api"
-API_ENCRYPTION_KEY="sua_chave_criptografica_aes256"
-
-NODE_ENV="development"
-```
-
-> ⚠️ **Atenção:** O arquivo `.env`, `firebase.json` e `serviceAccount.json` estão protegidos no `.gitignore` e **nunca** devem ser comitados.
-
-### 4. Verificar Tipagem & Sintaxe
-```bash
-npm run check
-```
-
-### 5. Iniciar em Modo de Desenvolvimento (Watch Mode Nativo)
-```bash
-npm run dev
-```
-O Vantinha iniciará com hot-reload nativo, monitorando alterações em `./src`, autenticando no Firestore e subindo o servidor Fastify na porta configurada.
+- **Não é um template open-source**: Este repositório é mantido publicamente exclusivamente para auditoria de transparência, portfólio e conformidade de integridade.
+- **Sem suporte a instâncias de terceiros**: Não é concedida autorização nem fornecido suporte para clonagem, hospedagem ou execução de instâncias derivadas por terceiros.
+- **Ambiente Restrito**: A orquestração, credenciais, pipelines de deploy e persistência são operados exclusivamente de forma privada pela equipe oficial do Vanta.
 
 ---
 
-## 📜 Scripts Disponíveis
-
-| Comando | Descrição |
-| :--- | :--- |
-| `npm run dev` | Inicia o bot em modo de desenvolvimento com hot-reload nativo (`node --watch`) |
-| `npm run check` | Executa o compilador TypeScript (`tsc --noEmit`) para validar 100% dos tipos |
-| `npm run build` | Compila o projeto TypeScript para JavaScript puro na pasta `/build` |
-| `npm start` | Executa o bot em ambiente de produção utilizando o código compilado |
-
----
-
-## 🔒 Governança & Ledger do Projeto
+## 🛡️ Governança & Integridade do Projeto
 
 O desenvolvimento deste bot segue o protocolo rigoroso do [PROJECT_STATE.md](file:///PROJECT_STATE.md). Qualquer ciclo de desenvolvimento exige:
 1. Leitura prévia das convenções no ledger.

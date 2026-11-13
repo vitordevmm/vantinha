@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 2.3.0`  
-> **Status**: Ativo & Operacional (Licença Anti-Plágio Estrita, Documentação Multi-Idioma PT-BR/EN/ES & 59 Emojis Oficiais)  
+> **Versão Vigente**: `Alpha 2.4.0`  
+> **Status**: Ativo & Operacional (Sigilo Operacional nos READMEs, Licença Anti-Plágio Estrita & Trilingue PT-BR/EN/ES)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
-> **Última Atualização**: 2026-11-13 (Build 017)  
+> **Última Atualização**: 2026-11-13 (Build 018)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -175,6 +175,22 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #018] — Purificação dos READMEs (Remoção de Guias de Execução/Setup & Foco em Sigilo)
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. **Remoção de Tutoriais e Passo a Passo nos READMEs**:
+     - Removidas por completo as seções *"Como Executar Localmente"* / *"How to Run Locally"* / *"Cómo Ejecutar Localmente"* de todos os 3 arquivos de documentação ([README.md](README.md), [README.en.md](README.en.md), [README.es.md](README.es.md)).
+     - Eliminadas as instruções de clone (`git clone`), instalação (`npm install`), configuração de variáveis de ambiente (`.env`), comandos de build e inicialização (`npm run dev`, `npm start`).
+  2. **Declaração Explícita de Infraestrutura Privada**:
+     - Inserida a seção *"Natureza do Repositório & Execução Privada"* em PT-BR, EN e ES, deixando claro que o Vantinha é um serviço proprietário interno do Vanta, que o repositório não é um template open-source reutilizável e que não há concessão de autorização nem suporte para clonagem ou execução de instâncias derivadas por terceiros.
+  3. Checagem de tipagem executada com sucesso (`npm run check` -> `✔ Ok`).
+- **Arquivos Modificados**:
+  - `README.md` (removido guia de execução; adicionada nota de execução privada)
+  - `README.en.md` (removido guia de execução; adicionada nota de execução privada)
+  - `README.es.md` (removido guia de execução; adicionada nota de execução privada)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.4.0`)
 
 ### [Update #017] — Licença Anti-Plágio Estrita (All Rights Reserved) & Documentação Multi-Idioma (PT-BR, EN, ES) no GitHub
 - **Data**: 2026-11-13

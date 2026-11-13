@@ -106,72 +106,17 @@ Vanta Bot/
 
 ---
 
-## 🚀 Cómo Ejecutar Localmente
+## 🔒 Alcance del Repositorio y Ejecución Privada
 
-### Requisitos Previos
-- **Node.js** 22.0.0 o superior instalado.
-- Archivo de credenciales de la Cuenta de Servicio de Firebase (`serviceAccount.json` o `firebase.json`) con Cloud Firestore activo.
-- Aplicación y Bot configurados en el [Discord Developer Portal](https://discord.com/developers/applications).
+**Vantinha** es una aplicación propietaria de infraestructura interna para el ecosistema **Vanta**.
 
-### 1. Clonar el Repositorio
-```bash
-git clone https://github.com/vitordevmm/vantinha.git
-cd vantinha
-```
-
-### 2. Instalar Dependencias
-```bash
-npm install
-```
-
-### 3. Configurar las Variables de Entorno
-Crea un archivo `.env` basado en [.env.example](file:///.env.example):
-```env
-# Discord Credentials
-BOT_TOKEN="TU_DISCORD_BOT_TOKEN"
-BOT_ID="1567751920645308548"
-
-# Firestore Database (Ruta del archivo Service Account JSON)
-FIREBASE_PATH="./serviceAccount.json"
-
-# API Server Config (Fastify)
-SERVER_PORT=8080
-
-# Dashboard & API Security (Claves Maestras)
-DASHBOARD_URL="http://localhost:3000"
-API_SECRET_KEY="tu_clave_secreta_api"
-API_ENCRYPTION_KEY="tu_clave_criptografica_aes256"
-
-NODE_ENV="development"
-```
-
-> ⚠️ **Importante:** Los archivos `.env`, `firebase.json` y `serviceAccount.json` están protegidos en `.gitignore` y **nunca** deben cometerse al repositorio.
-
-### 4. Verificar Tipado y Sintaxis
-```bash
-npm run check
-```
-
-### 5. Iniciar en Modo de Desarrollo (Watch Mode Nativo)
-```bash
-npm run dev
-```
-Vantinha arrancará con hot-reload nativo, observando cambios en `./src`, autenticándose con Firestore y levantando el servidor Fastify en el puerto configurado.
+- **No es una plantilla de código abierto**: Este repositorio se mantiene público exclusivamente para fines de auditoría de transparencia, portafolio y verificación de seguridad.
+- **Sin soporte para despliegues de terceros**: No se concede autorización ni se proporciona soporte para que terceros clonen, alojen, desplieguen o ejecuten instancias secundarias.
+- **Entorno Restringido**: La orquestación, credenciales privadas, pipelines de despliegue y clústeres de base de datos son gestionados de forma estrictamente privada por el equipo oficial de Vanta.
 
 ---
 
-## 📜 Scripts Disponibles
-
-| Comando | Descripción |
-| :--- | :--- |
-| `npm run dev` | Inicia el bot en modo de desarrollo con hot-reload nativo (`node --watch`) |
-| `npm run check` | Ejecuta el comprobador de tipos de TypeScript (`tsc --noEmit`) asegurando 0 errores |
-| `npm run build` | Compila el proyecto TypeScript a JavaScript puro en el directorio `/build` |
-| `npm start` | Ejecuta el bot compilado en entorno de producción |
-
----
-
-## 🔒 Gobernanza y Ledger del Proyecto
+## 🛡️ Gobernanza y Ledger del Proyecto
 
 El desarrollo sigue de forma estricta el protocolo documentado en [PROJECT_STATE.md](file:///PROJECT_STATE.md):
 1. Lectura obligatoria de convenciones y estado previo a cualquier modificación.

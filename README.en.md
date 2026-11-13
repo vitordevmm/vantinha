@@ -106,72 +106,17 @@ Vanta Bot/
 
 ---
 
-## 🚀 How to Run Locally
+## 🔒 Repository Scope & Private Execution
 
-### Prerequisites
-- **Node.js** 22.0.0 or higher installed.
-- Firebase Service Account key file (`serviceAccount.json` or `firebase.json`) with Cloud Firestore enabled.
-- Discord Application & Bot configured in the [Discord Developer Portal](https://discord.com/developers/applications).
+**Vantinha** is an exclusive, proprietary internal application for the **Vanta** ecosystem.
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/vitordevmm/vantinha.git
-cd vantinha
-```
-
-### 2. Install Dependencies
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-Create a `.env` file based on [.env.example](file:///.env.example):
-```env
-# Discord Credentials
-BOT_TOKEN="YOUR_DISCORD_BOT_TOKEN"
-BOT_ID="1567751920645308548"
-
-# Firestore Database (Service Account JSON path)
-FIREBASE_PATH="./serviceAccount.json"
-
-# API Server Config (Fastify)
-SERVER_PORT=8080
-
-# Dashboard & API Security (Master Keys)
-DASHBOARD_URL="http://localhost:3000"
-API_SECRET_KEY="your_secret_api_key"
-API_ENCRYPTION_KEY="your_aes256_encryption_key"
-
-NODE_ENV="development"
-```
-
-> ⚠️ **Important:** The `.env`, `firebase.json`, and `serviceAccount.json` files are protected by `.gitignore` and **must never** be committed.
-
-### 4. Verify Syntax & Types
-```bash
-npm run check
-```
-
-### 5. Start Development Server (Native Watch Mode)
-```bash
-npm run dev
-```
-Vantinha will launch with native hot-reload, tracking `./src` changes, authenticating with Firestore, and binding Fastify to the configured port.
+- **Not an open-source template**: This repository is publicly maintained exclusively for transparency, portfolio auditing, and security verification.
+- **No third-party deployment support**: No permission or support is provided for third parties to clone, host, deploy, or run secondary instances.
+- **Restricted Environment**: Orchestration, secret credentials, deployment pipelines, and persistent database clusters are strictly and privately operated by the official Vanta infrastructure team.
 
 ---
 
-## 📜 Available Scripts
-
-| Command | Description |
-| :--- | :--- |
-| `npm run dev` | Runs the bot in development mode with native hot-reload (`node --watch`) |
-| `npm run check` | Runs TypeScript typechecker (`tsc --noEmit`) to ensure zero errors |
-| `npm run build` | Compiles TypeScript source files into pure JavaScript in `/build` |
-| `npm start` | Launches the compiled bot in production mode |
-
----
-
-## 🔒 Governance & Project Ledger
+## 🛡️ Governance & Project Ledger
 
 Development strictly adheres to the protocol defined in [PROJECT_STATE.md](file:///PROJECT_STATE.md):
 1. Pre-reading conventions and state before modifications.
