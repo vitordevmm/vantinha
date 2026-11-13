@@ -11,6 +11,9 @@ import {
 import {
     buildVerificationPanel,
     consumeVerificationSession,
+    encryptData,
+    isEncryptedEnvelope,
+    safeDecryptPayload,
     validateVerificationSession,
 } from "#functions";
 import { createContainer, createSection, createTextDisplay, Separator } from "@magicyan/discord";
@@ -20,17 +23,62 @@ import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import type { GuildVerificationConfig, VerificationLogEntry } from "../../database/documents/GuildDocument.js";
 
-// Middleware simples para validar a chave de API nas chamadas do site
-function checkApiKey(req: FastifyRequest, res: FastifyReply): boolean {
+interface SecureRequestResult<T> {
+    authorized: boolean;
+    payload?: T;
+    isEncrypted: boolean;
+}
+
+// Valida a chave de API (x-api-key) e descriptografa o envelope AES-256-GCM se presente
+function processSecureRequest<T = any>(
+    req: FastifyRequest,
+    res: FastifyReply
+): SecureRequestResult<T> {
+    // 1. Validação da Chave de API
     const key = req.headers["x-api-key"] || req.headers.authorization?.replace("Bearer ", "");
     if (!key || key !== env.API_SECRET_KEY) {
         res.status(StatusCodes.UNAUTHORIZED).send({
             error: "Não autorizado",
             message: "Forneça uma x-api-key válida configurada no .env",
         });
-        return false;
+        return { authorized: false, isEncrypted: false };
     }
-    return true;
+
+    const isEncryptedHeader = req.headers["x-encrypted"] === "true";
+    const body = req.body;
+
+    // 2. Se o payload foi enviado criptografado
+    if (isEncryptedEnvelope(body) || isEncryptedHeader) {
+        const decrypted = safeDecryptPayload<T>(body);
+        if (!decrypted.success) {
+            res.status(StatusCodes.FORBIDDEN).send({
+                error: "Falha criptográfica",
+                message: decrypted.error,
+            });
+            return { authorized: false, isEncrypted: true };
+        }
+        return { authorized: true, payload: decrypted.data, isEncrypted: true };
+    }
+
+    // 3. Payload JSON plano (aceito com chave de API)
+    return { authorized: true, payload: body as T, isEncrypted: false };
+}
+
+// Responde ao cliente criptografando o JSON de resposta caso a requisição tenha sido criptografada
+function sendSecureResponse(
+    res: FastifyReply,
+    statusCode: number,
+    data: any,
+    shouldEncrypt: boolean
+) {
+    if (shouldEncrypt) {
+        const encrypted = encryptData(data);
+        return res
+            .status(statusCode)
+            .header("x-encrypted", "true")
+            .send(encrypted);
+    }
+    return res.status(statusCode).send(data);
 }
 
 const updateConfigSchema = z.object({
@@ -68,23 +116,50 @@ const verifySubmissionSchema = z.object({
 });
 
 export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
+    // 0. Handshake de Teste de Criptografia (POST /api/crypto/handshake)
+    // Permite que o site confirme que sua chave de criptografia e x-api-key estão 100% sincronizadas com o bot
+    app.post("/api/crypto/handshake", async (req, res) => {
+        const { authorized, payload, isEncrypted } = processSecureRequest<{ ping?: string }>(req, res);
+        if (!authorized) return;
+
+        const responseData = {
+            status: "vanta_secure_tunnel_online",
+            bot: {
+                id: client.user.id,
+                name: client.user.username,
+            },
+            echoPing: payload?.ping ?? "pong",
+            cipher: "aes-256-gcm",
+            isEncrypted,
+            timestamp: new Date().toISOString(),
+        };
+
+        return sendSecureResponse(res, StatusCodes.OK, responseData, isEncrypted);
+    });
+
     // 1. Valida a sessão temporária para a página do site (GET /api/verification/session/:token)
     app.get("/api/verification/session/:token", async (req, res) => {
         const { token } = req.params as { token: string };
         const session = validateVerificationSession(token);
+        const shouldEncrypt = req.headers["x-encrypted"] === "true";
 
         if (!session) {
-            return res.status(StatusCodes.NOT_FOUND).send({
-                valid: false,
-                message: "Sessão de verificação inválida ou expirada. Solicite um novo link no Discord.",
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.NOT_FOUND,
+                {
+                    valid: false,
+                    message: "Sessão de verificação inválida ou expirada. Solicite um novo link no Discord.",
+                },
+                shouldEncrypt
+            );
         }
 
         const guild = client.guilds.cache.get(session.guildId);
         const member = guild ? await guild.members.fetch(session.userId).catch(() => null) : null;
         const config = await getVerificationConfig(session.guildId);
 
-        return res.status(StatusCodes.OK).send({
+        const data = {
             valid: true,
             guild: {
                 id: session.guildId,
@@ -99,16 +174,19 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             },
             ui: config.ui,
             expiresAt: session.expiresAt,
-        });
+        };
+
+        return sendSecureResponse(res, StatusCodes.OK, data, shouldEncrypt);
     });
 
     // 2. Obter canais de texto do servidor para o dashboard (GET /api/guilds/:guildId/channels)
     app.get("/api/guilds/:guildId/channels", async (req, res) => {
         const { guildId } = req.params as { guildId: string };
         const guild = client.guilds.cache.get(guildId);
+        const shouldEncrypt = req.headers["x-encrypted"] === "true";
 
         if (!guild) {
-            return res.status(StatusCodes.NOT_FOUND).send({ error: "Guilda não encontrada no cache do bot" });
+            return sendSecureResponse(res, StatusCodes.NOT_FOUND, { error: "Guilda não encontrada no cache do bot" }, shouldEncrypt);
         }
 
         const channels = guild.channels.cache
@@ -121,16 +199,17 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             }))
             .sort((a, b) => a.position - b.position);
 
-        return res.status(StatusCodes.OK).send({ channels });
+        return sendSecureResponse(res, StatusCodes.OK, { channels }, shouldEncrypt);
     });
 
     // 3. Obter cargos do servidor para o dashboard (GET /api/guilds/:guildId/roles)
     app.get("/api/guilds/:guildId/roles", async (req, res) => {
         const { guildId } = req.params as { guildId: string };
         const guild = client.guilds.cache.get(guildId);
+        const shouldEncrypt = req.headers["x-encrypted"] === "true";
 
         if (!guild) {
-            return res.status(StatusCodes.NOT_FOUND).send({ error: "Guilda não encontrada no cache do bot" });
+            return sendSecureResponse(res, StatusCodes.NOT_FOUND, { error: "Guilda não encontrada no cache do bot" }, shouldEncrypt);
         }
 
         const roles = guild.roles.cache
@@ -143,65 +222,84 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             }))
             .sort((a, b) => b.position - a.position);
 
-        return res.status(StatusCodes.OK).send({ roles });
+        return sendSecureResponse(res, StatusCodes.OK, { roles }, shouldEncrypt);
     });
 
     // 4. Obter configurações atuais da verificação (GET /api/guilds/:guildId/verification)
     app.get("/api/guilds/:guildId/verification", async (req, res) => {
         const { guildId } = req.params as { guildId: string };
         const guild = client.guilds.cache.get(guildId);
+        const shouldEncrypt = req.headers["x-encrypted"] === "true";
 
         if (!guild) {
-            return res.status(StatusCodes.NOT_FOUND).send({ error: "Guilda não encontrada no cache do bot" });
+            return sendSecureResponse(res, StatusCodes.NOT_FOUND, { error: "Guilda não encontrada no cache do bot" }, shouldEncrypt);
         }
 
         const config = await getVerificationConfig(guildId);
-        return res.status(StatusCodes.OK).send({ config });
+        return sendSecureResponse(res, StatusCodes.OK, { config }, shouldEncrypt);
     });
 
     // 5. Salvar configurações da verificação via dashboard (PUT /api/guilds/:guildId/verification)
+    // Suporta envio criptografado com retorno também criptografado
     app.put("/api/guilds/:guildId/verification", async (req, res) => {
-        if (!checkApiKey(req, res)) return;
+        const { authorized, payload, isEncrypted } = processSecureRequest<any>(req, res);
+        if (!authorized) return;
 
         const { guildId } = req.params as { guildId: string };
-        const parsed = updateConfigSchema.safeParse(req.body);
+        const parsed = updateConfigSchema.safeParse(payload);
 
         if (!parsed.success) {
-            return res.status(StatusCodes.BAD_REQUEST).send({
-                error: "Parâmetros inválidos",
-                details: parsed.error.issues,
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                {
+                    error: "Parâmetros inválidos",
+                    details: parsed.error.issues,
+                },
+                isEncrypted
+            );
         }
 
         const saved = await saveVerificationConfig(guildId, parsed.data as Partial<GuildVerificationConfig>);
-        return res.status(StatusCodes.OK).send({ success: true, config: saved });
+        return sendSecureResponse(res, StatusCodes.OK, { success: true, config: saved }, isEncrypted);
     });
 
     // 6. Publicar ou Atualizar o Painel no Canal do Discord (POST /api/guilds/:guildId/verification/publish)
     app.post("/api/guilds/:guildId/verification/publish", async (req, res) => {
-        if (!checkApiKey(req, res)) return;
+        const { authorized, isEncrypted } = processSecureRequest(req, res);
+        if (!authorized) return;
 
         const { guildId } = req.params as { guildId: string };
         const guild = client.guilds.cache.get(guildId);
 
         if (!guild) {
-            return res.status(StatusCodes.NOT_FOUND).send({ error: "Guilda não encontrada" });
+            return sendSecureResponse(res, StatusCodes.NOT_FOUND, { error: "Guilda não encontrada" }, isEncrypted);
         }
 
         const config = await getVerificationConfig(guildId);
         if (!config.channelId) {
-            return res.status(StatusCodes.BAD_REQUEST).send({
-                error: "Canal não configurado",
-                message: "Selecione o canal do painel antes de publicar.",
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                {
+                    error: "Canal não configurado",
+                    message: "Selecione o canal do painel antes de publicar.",
+                },
+                isEncrypted
+            );
         }
 
         const channel = guild.channels.cache.get(config.channelId) as TextChannel | undefined;
         if (!channel || !channel.isTextBased()) {
-            return res.status(StatusCodes.BAD_REQUEST).send({
-                error: "Canal inválido",
-                message: "O canal configurado não foi encontrado ou não é de texto.",
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                {
+                    error: "Canal inválido",
+                    message: "O canal configurado não foi encontrado ou não é de texto.",
+                },
+                isEncrypted
+            );
         }
 
         const panelPayload = buildVerificationPanel(config);
@@ -232,30 +330,47 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
 
             await saveVerificationConfig(guildId, { messageId });
 
-            return res.status(StatusCodes.OK).send({
-                success: true,
-                messageId,
-                channelId: channel.id,
-                channelName: channel.name,
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.OK,
+                {
+                    success: true,
+                    messageId,
+                    channelId: channel.id,
+                    channelName: channel.name,
+                },
+                isEncrypted
+            );
         } catch (error) {
-            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
-                error: "Falha ao publicar painel",
-                details: String(error),
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.INTERNAL_SERVER_ERROR,
+                {
+                    error: "Falha ao publicar painel",
+                    details: String(error),
+                },
+                isEncrypted
+            );
         }
     });
 
     // 7. Submissão de Verificação pelo Site (POST /api/verification/verify)
+    // Suporta recepção de payload criptografado e resposta criptografada
     app.post("/api/verification/verify", async (req, res) => {
-        if (!checkApiKey(req, res)) return;
+        const { authorized, payload, isEncrypted } = processSecureRequest<any>(req, res);
+        if (!authorized) return;
 
-        const parsed = verifySubmissionSchema.safeParse(req.body);
+        const parsed = verifySubmissionSchema.safeParse(payload);
         if (!parsed.success) {
-            return res.status(StatusCodes.BAD_REQUEST).send({
-                error: "Payload de verificação inválido",
-                details: parsed.error.issues,
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.BAD_REQUEST,
+                {
+                    error: "Payload de verificação inválido",
+                    details: parsed.error.issues,
+                },
+                isEncrypted
+            );
         }
 
         const { token, guildId, userId, ip, isVpn, userAgent, fingerprint } = parsed.data;
@@ -263,20 +378,25 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
         // Consome a sessão temporária
         const session = consumeVerificationSession(token);
         if (!session || session.guildId !== guildId || session.userId !== userId) {
-            return res.status(StatusCodes.FORBIDDEN).send({
-                error: "Token expirado ou inválido",
-                message: "Sua sessão expirou. Clique novamente no botão de verificação no Discord.",
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.FORBIDDEN,
+                {
+                    error: "Token expirado ou inválido",
+                    message: "Sua sessão expirou. Clique novamente no botão de verificação no Discord.",
+                },
+                isEncrypted
+            );
         }
 
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
-            return res.status(StatusCodes.NOT_FOUND).send({ error: "Guilda não encontrada" });
+            return sendSecureResponse(res, StatusCodes.NOT_FOUND, { error: "Guilda não encontrada" }, isEncrypted);
         }
 
         const member = await guild.members.fetch(userId).catch(() => null);
         if (!member) {
-            return res.status(StatusCodes.NOT_FOUND).send({ error: "Membro não encontrado no servidor" });
+            return sendSecureResponse(res, StatusCodes.NOT_FOUND, { error: "Membro não encontrado no servidor" }, isEncrypted);
         }
 
         const config = await getVerificationConfig(guildId);
@@ -333,7 +453,7 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             }
         }
 
-        // Registrar Log
+        // Registrar Log no Histórico da Guilda
         const logEntry: VerificationLogEntry = {
             id: `log_${Date.now()}_${userId}`,
             userId: member.id,
@@ -350,10 +470,9 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
             reason: reason ?? (userAgent ? `Navegador: ${userAgent.slice(0, 50)}` : undefined),
         };
 
-        // 1. Gravar Log no Histórico da Guilda
         await recordVerificationLog(guildId, logEntry);
 
-        // 2. Gravar e enriquecer os dados base no UserDocument
+        // Gravar e enriquecer os dados base no UserDocument
         await recordUserVerification({
             member,
             ip,
@@ -396,36 +515,47 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
         }
 
         const isSuccess = actionTaken === "verified" || actionTaken === "flagged";
-        return res.status(isSuccess ? StatusCodes.OK : StatusCodes.FORBIDDEN).send({
-            success: isSuccess,
-            actionTaken,
-            reason,
-            member: {
-                id: member.id,
-                username: member.user.username,
-                tag: member.user.tag,
+        return sendSecureResponse(
+            res,
+            isSuccess ? StatusCodes.OK : StatusCodes.FORBIDDEN,
+            {
+                success: isSuccess,
+                actionTaken,
+                reason,
+                member: {
+                    id: member.id,
+                    username: member.user.username,
+                    tag: member.user.tag,
+                },
             },
-        });
+            isEncrypted
+        );
     });
 
     // 8. Obter Histórico de Logs para o Dashboard (GET /api/guilds/:guildId/verification/logs)
     app.get("/api/guilds/:guildId/verification/logs", async (req, res) => {
         const { guildId } = req.params as { guildId: string };
         const logs = await getVerificationLogs(guildId);
-        return res.status(StatusCodes.OK).send({ logs });
+        const shouldEncrypt = req.headers["x-encrypted"] === "true";
+
+        return sendSecureResponse(res, StatusCodes.OK, { logs }, shouldEncrypt);
     });
 
     // 9. Obter Dados Base de um Usuário (UserDocument) para o Dashboard (GET /api/users/:userId)
     app.get("/api/users/:userId", async (req, res) => {
         const { userId } = req.params as { userId: string };
         const userDoc = await getUserData(userId);
+        const shouldEncrypt = req.headers["x-encrypted"] === "true";
 
         if (!userDoc) {
-            return res.status(StatusCodes.NOT_FOUND).send({
-                error: "Usuário não encontrado no banco de dados",
-            });
+            return sendSecureResponse(
+                res,
+                StatusCodes.NOT_FOUND,
+                { error: "Usuário não encontrado no banco de dados" },
+                shouldEncrypt
+            );
         }
 
-        return res.status(StatusCodes.OK).send({ user: userDoc });
+        return sendSecureResponse(res, StatusCodes.OK, { user: userDoc }, shouldEncrypt);
     });
 }

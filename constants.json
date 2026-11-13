@@ -7,9 +7,10 @@
     "default": "#2B2D31",
 
     "vanta": "#0a0a0c",
+    "vantaGold": "#E5A93C",
     "vantaDark": "#121217",
     "vantaLight": "#1c1c24",
-    "vantaAccent": "#7c3aed",
+    "vantaAccent": "#E5A93C",
     "vantaCyan": "#06b6d4",
 
     "primary": "#3b82f6",

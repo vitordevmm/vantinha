@@ -9,6 +9,7 @@ export const env = await validateEnv(z.object({
     SERVER_PORT: z.coerce.number().min(1).default(8080),
     DASHBOARD_URL: z.string().default("http://localhost:3000"),
     API_SECRET_KEY: z.string().default("vanta_secret_token_dev"),
+    API_ENCRYPTION_KEY: z.string().default("vanta_aes256_super_secret_cipher_key_2026"),
     WEBHOOK_LOGS_URL: z.string().url().optional(),
     GUILD_ID: z.string().optional(),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development")

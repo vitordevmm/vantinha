@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.2.0`  
-> **Status**: Ativo & Operacional (Sistema de Verificação, UserDocument & API Fastify)  
+> **Versão Vigente**: `Alpha 1.3.0`  
+> **Status**: Ativo & Operacional (Sistema de Verificação, UserDocument, Fastify API & Criptografia E2E AES-256-GCM)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 006)  
+> **Última Atualização**: 2026-11-13 (Build 007)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -35,6 +35,7 @@
 - **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Coleções: `guilds`, `guilds/:id/members` e `users`.
 - **Servidor Web API**: Fastify rodando na porta `8080` (variável `SERVER_PORT`) para comunicação bidirecional com o futuro site/dashboard do Vanta.
 - **Segurança da API**: Chave secreta `API_SECRET_KEY` configurada no `.env` (validação via header `x-api-key`).
+- **Criptografia E2E da API**: AES-256-GCM ponta a ponta com chave derivada SHA-256 (`API_ENCRYPTION_KEY`). Envelopes autenticados `{ iv, authTag, data }` anti-violação e anti-adulteração.
 - **Framework Base**: `constatic` (`@constatic/base` + `@magicyan/discord`).
 
 ---
@@ -105,38 +106,66 @@ Vanta Bot/
     │       └── sample.ts    # Template para novos eventos
     ├── functions/           # Funções utilitárias e lógica de negócio
     │   ├── index.ts
+    │   ├── crypto.ts        # Motor de criptografia AES-256-GCM com envelopes autenticados
     │   └── verification.ts  # buildVerificationPanel (V2), sessões e tokens temporários
     └── server/              # Servidor API Fastify para comunicação com o site
         ├── index.ts         # Inicialização do Fastify via evento clientReady
         └── routes/          # Rotas HTTP estruturadas
             ├── index.ts     # Registro centralizador de rotas
             ├── home.ts      # Rota GET / e GET /api/guilds (seletor de servidores)
-            └── verification.ts # Endpoints completos de verificação, logs e perfil do usuário (/api/users/:userId)
+            └── verification.ts # Endpoints completos de verificação, logs, perfil do usuário e handshake criptográfico
 ```
 
 ---
 
 ## 4. Endpoints da API Fastify (Comunicação com o Site)
 
-Porta padrão: `8080`. Autenticação via header: `x-api-key: <API_SECRET_KEY>`.
+Porta padrão: `8080`.
+- **Autenticação**: Header obrigatório `x-api-key: <API_SECRET_KEY>`.
+- **Criptografia E2E (AES-256-GCM)**: Suporte a envelopes protegidos `{ iv: string, authTag: string, data: string }` usando chave derivada de `API_ENCRYPTION_KEY`.
 
-| Método | Endpoint | Protegido | Descrição |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | Não | Status geral do bot e métricas |
-| `GET` | `/api/guilds` | Não | Lista os servidores em que o bot está para o dashboard |
-| `GET` | `/api/guilds/:guildId/channels` | Não | Lista canais de texto para preencher dropdowns |
-| `GET` | `/api/guilds/:guildId/roles` | Não | Lista cargos do servidor para preencher dropdowns |
-| `GET` | `/api/guilds/:guildId/verification` | Não | Retorna configurações atuais de verificação |
-| `PUT` | `/api/guilds/:guildId/verification` | **Sim** | Salva/atualiza configurações (canais, cargos, alts, vpn, UI) |
-| `POST` | `/api/guilds/:guildId/verification/publish` | **Sim** | Envia ou atualiza o painel Components V2 no canal Discord |
-| `GET` | `/api/verification/session/:token` | Não | Valida o token temporário quando o usuário abre o site |
-| `POST` | `/api/verification/verify` | **Sim** | Processa a verificação, salva no `UserDocument`, entrega cargos e gera logs |
-| `GET` | `/api/guilds/:guildId/verification/logs` | Não | Retorna histórico de auditoria para tabela no site |
-| `GET` | `/api/users/:userId` | Não | Retorna documento completo do usuário (`UserDocument`) |
+| Método | Endpoint | Protegido | Criptografia E2E | Descrição |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/` | Não | Opcional | Status geral do bot e métricas |
+| `POST` | `/api/crypto/handshake` | **Sim** | **Sim (AES-256-GCM)** | Teste bidirecional de integridade criptográfica |
+| `GET` | `/api/guilds` | Não | Opcional | Lista os servidores em que o bot está para o dashboard |
+| `GET` | `/api/guilds/:guildId/channels` | Não | Opcional | Lista canais de texto para preencher dropdowns |
+| `GET` | `/api/guilds/:guildId/roles` | Não | Opcional | Lista cargos do servidor para preencher dropdowns |
+| `GET` | `/api/guilds/:guildId/verification` | Não | Opcional | Retorna configurações atuais de verificação |
+| `PUT` | `/api/guilds/:guildId/verification` | **Sim** | **Sim (Envelope)** | Salva/atualiza configurações (canais, cargos, alts, vpn, UI) |
+| `POST` | `/api/guilds/:guildId/verification/publish` | **Sim** | **Sim (Envelope)** | Envia ou atualiza o painel Components V2 no canal Discord |
+| `GET` | `/api/verification/session/:token` | Não | Opcional | Valida o token temporário quando o usuário abre o site |
+| `POST` | `/api/verification/verify` | **Sim** | **Sim (Envelope)** | Processa a verificação, salva no `UserDocument`, entrega cargos e gera logs |
+| `GET` | `/api/guilds/:guildId/verification/logs` | Não | Opcional | Retorna histórico de auditoria para tabela no site |
+| `GET` | `/api/users/:userId` | Não | Opcional | Retorna documento completo do usuário (`UserDocument`) |
 
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #007] — Camada de Criptografia E2E AES-256-GCM & Handshake de Segurança
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Criado módulo de alta segurança `src/functions/crypto.ts`:
+     - Algoritmo: **AES-256-GCM** (Galois/Counter Mode com AEAD).
+     - Derivação de chave de 32 bytes via `crypto.createHash('sha256')` a partir da variável `API_ENCRYPTION_KEY`.
+     - IV aleatório criptográfico de 12 bytes por payload.
+     - Auth Tag de 16 bytes garantindo que mensagens alteradas ou forjadas sejam rejeitadas com erro 403 antes de qualquer processamento.
+     - Formato do Envelope: `{ iv: string, authTag: string, data: string }`.
+  2. Adicionado suporte no `src/server/routes/verification.ts`:
+     - Helpers `processSecureRequest` e `sendSecureResponse` para aceitar envelopes cifrados e responder criptografado automaticamente.
+     - Endpoint de teste e validação `POST /api/crypto/handshake`.
+     - Atualização transparente dos endpoints de escrita (`PUT /api/guilds/:guildId/verification`, `POST /api/guilds/:guildId/verification/publish`, `POST /api/verification/verify`).
+  3. Atualizado `src/env.ts`, `.env` e `.env.example` com `API_ENCRYPTION_KEY`.
+  4. Realizado teste automatizado de handshake: sucesso com chave válida, 401 para API key inválida, e 403 para tentativa de adulteração ou chave errada.
+- **Arquivos Criados / Modificados**:
+  - `src/functions/crypto.ts` (criado)
+  - `src/functions/index.ts` (exportação do crypto)
+  - `src/env.ts` (validação de `API_ENCRYPTION_KEY`)
+  - `.env` e `.env.example` (definição de chave)
+  - `src/server/routes/verification.ts` (integração E2E e handshake)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.3.0`)
 
 ### [Update #006] — Arquitetura de UserDocument & Persistência de Dados Base do Usuário
 - **Data**: 2026-11-13
