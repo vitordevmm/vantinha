@@ -1,7 +1,5 @@
-import { env } from "#env";
 import {
     findAltsByIp,
-    getUserData,
     getVerificationConfig,
     getVerificationLogs,
     recordUserVerification,
@@ -11,75 +9,16 @@ import {
 import {
     buildVerificationPanel,
     consumeVerificationSession,
-    encryptData,
-    isEncryptedEnvelope,
-    safeDecryptPayload,
+    processSecureRequest,
+    sendSecureResponse,
     validateVerificationSession,
 } from "#functions";
 import { createContainer, createSection, createTextDisplay, Separator } from "@magicyan/discord";
 import { ChannelType, MessageFlags, type Client, type TextChannel } from "discord.js";
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod";
 import type { GuildVerificationConfig, VerificationLogEntry } from "../../database/documents/GuildDocument.js";
-
-interface SecureRequestResult<T> {
-    authorized: boolean;
-    payload?: T;
-    isEncrypted: boolean;
-}
-
-// Valida a chave de API (x-api-key) e descriptografa o envelope AES-256-GCM se presente
-function processSecureRequest<T = any>(
-    req: FastifyRequest,
-    res: FastifyReply
-): SecureRequestResult<T> {
-    // 1. Validação da Chave de API
-    const key = req.headers["x-api-key"] || req.headers.authorization?.replace("Bearer ", "");
-    if (!key || key !== env.API_SECRET_KEY) {
-        res.status(StatusCodes.UNAUTHORIZED).send({
-            error: "Não autorizado",
-            message: "Forneça uma x-api-key válida configurada no .env",
-        });
-        return { authorized: false, isEncrypted: false };
-    }
-
-    const isEncryptedHeader = req.headers["x-encrypted"] === "true";
-    const body = req.body;
-
-    // 2. Se o payload foi enviado criptografado
-    if (isEncryptedEnvelope(body) || isEncryptedHeader) {
-        const decrypted = safeDecryptPayload<T>(body);
-        if (!decrypted.success) {
-            res.status(StatusCodes.FORBIDDEN).send({
-                error: "Falha criptográfica",
-                message: decrypted.error,
-            });
-            return { authorized: false, isEncrypted: true };
-        }
-        return { authorized: true, payload: decrypted.data, isEncrypted: true };
-    }
-
-    // 3. Payload JSON plano (aceito com chave de API)
-    return { authorized: true, payload: body as T, isEncrypted: false };
-}
-
-// Responde ao cliente criptografando o JSON de resposta caso a requisição tenha sido criptografada
-function sendSecureResponse(
-    res: FastifyReply,
-    statusCode: number,
-    data: any,
-    shouldEncrypt: boolean
-) {
-    if (shouldEncrypt) {
-        const encrypted = encryptData(data);
-        return res
-            .status(statusCode)
-            .header("x-encrypted", "true")
-            .send(encrypted);
-    }
-    return res.status(statusCode).send(data);
-}
 
 const updateConfigSchema = z.object({
     enabled: z.boolean().optional(),
@@ -539,23 +478,5 @@ export function verificationRoutes(app: FastifyInstance, client: Client<true>) {
         const shouldEncrypt = req.headers["x-encrypted"] === "true";
 
         return sendSecureResponse(res, StatusCodes.OK, { logs }, shouldEncrypt);
-    });
-
-    // 9. Obter Dados Base de um Usuário (UserDocument) para o Dashboard (GET /api/users/:userId)
-    app.get("/api/users/:userId", async (req, res) => {
-        const { userId } = req.params as { userId: string };
-        const userDoc = await getUserData(userId);
-        const shouldEncrypt = req.headers["x-encrypted"] === "true";
-
-        if (!userDoc) {
-            return sendSecureResponse(
-                res,
-                StatusCodes.NOT_FOUND,
-                { error: "Usuário não encontrado no banco de dados" },
-                shouldEncrypt
-            );
-        }
-
-        return sendSecureResponse(res, StatusCodes.OK, { user: userDoc }, shouldEncrypt);
     });
 }

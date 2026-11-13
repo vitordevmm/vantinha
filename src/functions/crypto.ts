@@ -1,10 +1,18 @@
 import { env } from "#env";
 import crypto from "node:crypto";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { StatusCodes } from "http-status-codes";
 
 export interface EncryptedEnvelope {
     iv: string;       // 12 bytes em hex (padrão GCM)
     authTag: string;  // 16 bytes em hex (tag de autenticação GCM)
     data: string;     // Dados criptografados em hex
+}
+
+export interface SecureRequestResult<T> {
+    authorized: boolean;
+    payload?: T;
+    isEncrypted: boolean;
 }
 
 // Deriva deterministicamente uma chave de 256 bits (32 bytes) a partir da chave configurada no .env
@@ -83,10 +91,63 @@ export function safeDecryptPayload<T = unknown>(
     try {
         const decrypted = decryptData<T>(body);
         return { success: true, data: decrypted };
-    } catch (err) {
+    } catch {
         return {
             success: false,
             error: "Falha na descriptografia da mensagem: chave inválida ou adulteração no trânsito.",
         };
     }
+}
+
+/**
+ * Valida a chave de API (x-api-key) e descriptografa o envelope AES-256-GCM caso presente
+ */
+export function processSecureRequest<T = any>(
+    req: FastifyRequest,
+    res: FastifyReply
+): SecureRequestResult<T> {
+    const key = req.headers["x-api-key"] || req.headers.authorization?.replace("Bearer ", "");
+    if (!key || key !== env.API_SECRET_KEY) {
+        res.status(StatusCodes.UNAUTHORIZED).send({
+            error: "Não autorizado",
+            message: "Forneça uma x-api-key válida configurada no .env",
+        });
+        return { authorized: false, isEncrypted: false };
+    }
+
+    const isEncryptedHeader = req.headers["x-encrypted"] === "true";
+    const body = req.body;
+
+    if (isEncryptedEnvelope(body) || isEncryptedHeader) {
+        const decrypted = safeDecryptPayload<T>(body);
+        if (!decrypted.success) {
+            res.status(StatusCodes.FORBIDDEN).send({
+                error: "Falha criptográfica",
+                message: decrypted.error,
+            });
+            return { authorized: false, isEncrypted: true };
+        }
+        return { authorized: true, payload: decrypted.data, isEncrypted: true };
+    }
+
+    return { authorized: true, payload: body as T, isEncrypted: false };
+}
+
+/**
+ * Responde ao cliente criptografando o JSON de resposta caso a requisição tenha sido criptografada
+ */
+export function sendSecureResponse(
+    res: FastifyReply,
+    statusCode: number,
+    data: any,
+    shouldEncrypt: boolean
+) {
+    if (shouldEncrypt) {
+        const encrypted = encryptData(data);
+        return res
+            .status(statusCode)
+            .header("x-encrypted", "true")
+            .send(encrypted);
+    }
+    return res.status(statusCode).send(data);
 }

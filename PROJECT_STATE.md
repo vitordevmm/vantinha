@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.4.0`  
-> **Status**: Ativo & Operacional (Sistema de Verificação, UserDocument, Fastify API, Criptografia E2E AES-256-GCM & Firestore Cloud Oficial)  
+> **Versão Vigente**: `Alpha 1.5.0`  
+> **Status**: Ativo & Operacional (Gateway Mestre de Dados, User Sync E2E, Dashboard Overview, Detecção Global de Alts & Firestore Oficial)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 008)  
+> **Última Atualização**: 2026-11-13 (Build 009)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -114,7 +114,9 @@ Vanta Bot/
         └── routes/          # Rotas HTTP estruturadas
             ├── index.ts     # Registro centralizador de rotas
             ├── home.ts      # Rota GET / e GET /api/guilds (seletor de servidores)
-            └── verification.ts # Endpoints completos de verificação, logs, perfil do usuário e handshake criptográfico
+            ├── verification.ts # Endpoints completos de verificação, logs e handshake criptográfico
+            ├── users.ts     # Gateway Mestre de Usuários (Sync OAuth/Web, busca, paginação, moderação)
+            └── dashboard.ts # Métricas consolidadas e membros para o dashboard web
 ```
 
 ---
@@ -129,20 +131,51 @@ Porta padrão: `8080`.
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/` | Não | Opcional | Status geral do bot e métricas |
 | `POST` | `/api/crypto/handshake` | **Sim** | **Sim (AES-256-GCM)** | Teste bidirecional de integridade criptográfica |
+| `GET` | `/api/dashboard/overview` | **Sim** | **Sim (Envelope)** | Visão geral consolidada de métricas, saúde do bot e atividades |
 | `GET` | `/api/guilds` | Não | Opcional | Lista os servidores em que o bot está para o dashboard |
 | `GET` | `/api/guilds/:guildId/channels` | Não | Opcional | Lista canais de texto para preencher dropdowns |
 | `GET` | `/api/guilds/:guildId/roles` | Não | Opcional | Lista cargos do servidor para preencher dropdowns |
+| `GET` | `/api/guilds/:guildId/members` | **Sim** | **Sim (Envelope)** | Lista membros do servidor com cargos e dados de criação |
 | `GET` | `/api/guilds/:guildId/verification` | Não | Opcional | Retorna configurações atuais de verificação |
 | `PUT` | `/api/guilds/:guildId/verification` | **Sim** | **Sim (Envelope)** | Salva/atualiza configurações (canais, cargos, alts, vpn, UI) |
 | `POST` | `/api/guilds/:guildId/verification/publish` | **Sim** | **Sim (Envelope)** | Envia ou atualiza o painel Components V2 no canal Discord |
 | `GET` | `/api/verification/session/:token` | Não | Opcional | Valida o token temporário quando o usuário abre o site |
 | `POST` | `/api/verification/verify` | **Sim** | **Sim (Envelope)** | Processa a verificação, salva no `UserDocument`, entrega cargos e gera logs |
 | `GET` | `/api/guilds/:guildId/verification/logs` | Não | Opcional | Retorna histórico de auditoria para tabela no site |
-| `GET` | `/api/users/:userId` | Não | Opcional | Retorna documento completo do usuário (`UserDocument`) |
+| `POST` | `/api/users/sync` | **Sim** | **Sim (Envelope)** | **Gateway Mestre**: Sincroniza telemetria do site (alts, idade, IP, sessões) |
+| `GET` | `/api/users` | **Sim** | **Sim (Envelope)** | Diretório de usuários com filtros (`search`, `status`, `hasAlts`) e paginação |
+| `GET` | `/api/users/:userId` | **Sim** | **Sim (Envelope)** | Dossiê completo do usuário com enriquecimento ao vivo do Discord |
+| `PUT` | `/api/users/:userId` | **Sim** | **Sim (Envelope)** | Atualiza status (`active`, `flagged`, `banned`) e anotações administrativas |
+| `POST` | `/api/users/:userId/action` | **Sim** | **Sim (Envelope)** | Dispara ações no Discord (`kick`, `ban`, `unban`) via Dashboard |
 
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #009] — Gateway Mestre de Dados do Usuário & Dashboard com E2E AES-256-GCM
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Criado **Gateway Mestre de Dados** (`src/server/routes/users.ts` e `src/database/functions/users.ts`):
+     - O site não precisa conhecer ou manipular schemas complexos do Firestore diretamente.
+     - Endpoint `POST /api/users/sync`: recebe login OAuth2/acesso do site, calcula automaticamente `accountAgeDays`, vincula histórico de `knownIps` e `knownUserAgents`, atualiza `lastSeenAt` e detecta contas secundárias.
+     - **Detecção Global de Alts**: implementada função `findGlobalAltsByIp` que detecta e vincula bidirecionalmente contas secundárias compartilhando o mesmo IP.
+     - Endpoint `GET /api/users`: tabela completa para o dashboard com paginação (`page`, `limit`), busca textual e filtros (`status`, `hasAlts`).
+     - Endpoint `GET /api/users/:userId`: dossiê detalhado enriquecido em tempo real com dados de presença e cargos do Discord.
+     - Endpoints `PUT /api/users/:userId` e `POST /api/users/:userId/action`: controle administrativo direto pelo dashboard (alteração de status, kick, ban e unban).
+  2. Criado módulo de visualização `src/server/routes/dashboard.ts`:
+     - Endpoint `GET /api/dashboard/overview`: retorna métricas consolidadas (usuários totais, verificados, alts, flags, VPNs, ping WebSocket, uptime, memória e feeds recentes).
+     - Endpoint `GET /api/guilds/:guildId/members`: listagem de membros do Discord com cargos e datas.
+  3. Refatoração e centralização de segurança em `src/functions/crypto.ts`:
+     - Helpers `processSecureRequest` e `sendSecureResponse` exportados como padrão para todas as rotas da API, garantindo conformidade AES-256-GCM em 100% dos fluxos.
+- **Arquivos Criados / Modificados**:
+  - `src/server/routes/users.ts` (criado)
+  - `src/server/routes/dashboard.ts` (criado)
+  - `src/database/functions/users.ts` (novas funções `findGlobalAltsByIp`, `syncWebUser`, `listUsers`, `updateUserStatus`)
+  - `src/functions/crypto.ts` (exportação de helpers reutilizáveis)
+  - `src/server/routes/index.ts` (registro das novas rotas)
+  - `src/server/routes/verification.ts` (limpeza de duplicatas)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.5.0`)
 
 ### [Update #008] — Conexão Definitiva do Google Cloud Firestore (Projeto: vantinha-e9fca)
 - **Data**: 2026-11-13
