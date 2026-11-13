@@ -1,9 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.7.0`  
-> **Status**: Ativo & Operacional (Lei de Privacidade & Zero Exposição de Backend, /help Dinâmico & E2E AES-256-GCM)  
+> **Versão Vigente**: `Alpha 1.8.0`  
+> **Status**: Ativo & Operacional (README Oficial Estilizado, Repositório GitHub Vinculado & Protocolo de Commit Contínuo)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 011)  
+> **Repositório GitHub**: `https://github.com/vitordevmm/vantinha`  
+> **Última Atualização**: 2026-11-13 (Build 012)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -43,6 +44,7 @@
 - **Nome**: Vantinha (Bot do Vanta)
 - **ID do Bot**: `1567751920645308548`
 - **Repositório / Workspace**: `c:\Users\pc\Documents\Vanta Bot`
+- **Repositório Remoto GitHub**: `https://github.com/vitordevmm/vantinha` (origin)
 - **Token do Discord**: Armazenado com segurança exclusivamente no arquivo `.env` (variável `BOT_TOKEN`), validado em `src/env.ts`.
 - **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Projeto oficial: `vantinha-e9fca`. Credenciais salvas em `firebase.json` e `serviceAccount.json` (ambos protegidos no `.gitignore`). Coleções ativas: `guilds`, `guilds/:id/members` e `users`.
 - **Servidor Web API**: Fastify rodando na porta `8080` (variável `SERVER_PORT`) para comunicação bidirecional com o futuro site/dashboard do Vanta.
@@ -163,6 +165,22 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #012] — README.md Oficial Estilizado & Vinculação ao Repositório GitHub
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Configurado o remote Git `origin` apontando para o repositório oficial do projeto: `https://github.com/vitordevmm/vantinha`.
+  2. Criado o `README.md` completo, profissional e altamente estilizado:
+     - Badges oficiais de tecnologias (TypeScript, Node.js 22+, Constatic Base, Discord.js v14, Components V2, Fastify, Firestore, AES-256-GCM).
+     - Apresentação executiva do bot e suas principais capacidades (Master Data Gateway, Verificação com Alts/VPN, UI 100% Components V2, Criptografia E2E).
+     - Diagrama detalhado da árvore de diretórios e tabela de papéis da arquitetura.
+     - Guia passo a passo de clone, instalação, scripts e setup local.
+     - **Sigilo total mantido**: nenhum token, chave privada ou segredo sensível exposto (apenas modelos de `.env.example`).
+  3. Formalizado o protocolo de Git commit contínuo obrigatório a cada atualização concluída.
+- **Arquivos Criados / Modificados**:
+  - `README.md` (criado estilizado)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.8.0`)
 
 ### [Update #011] — Promulgação da Lei de Privacidade & Purificação de Detalhes de Backend
 - **Data**: 2026-11-13
