@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.0.2`  
+> **Versão Vigente**: `Alpha 1.0.3`  
 > **Status**: Ativo & Operacional (Base Constatic + Discord Components V2 + Firestore + Fastify API)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 003)  
+> **Última Atualização**: 2026-11-13 (Build 004)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -69,7 +69,7 @@ Vanta Bot/
 ├── firebase.example.json    # Exemplo do JSON de Service Account do Firestore
 ├── firebase.json            # Chave de credenciais do Firebase (ignorado no git)
 ├── firestore.md             # Guia rápido de configuração do Firestore
-├── package.json             # Scripts (dev em watch mode nativo), dependências
+├── package.json             # Scripts (dev em watch-path=./src), dependências
 ├── tsconfig.json            # Configuração TypeScript estrita com aliases #
 ├── PROJECT_STATE.md         # ESTE ARQUIVO: Memória e ledger contínuo do projeto
 └── src/
@@ -89,11 +89,13 @@ Vanta Bot/
     │   ├── commands/        # Comandos Slash e Context Menus (100% Components V2)
     │   │   └── public/
     │   │       ├── counter.ts # Exemplo interativo com Discord Components V2
+    │   │       ├── help.ts    # Central de ajuda e comandos (100% Components V2)
     │   │       └── ping.ts    # Latência WebSocket e gateway com container V2
     │   ├── responders/      # Ouvintes de botões, selects e modais com radix router
     │   │   └── buttons/
     │   │       └── remind.ts  # Responder do botão de ping com container V2
     │   └── events/          # Ouvintes de eventos do Discord.js
+    │       ├── presence.ts  # Rotação dinâmica de status e Rich Presence temática
     │       ├── ready.ts     # Log personalizado de inicialização do Vantinha
     │       └── sample.ts    # Template para novos eventos
     ├── functions/           # Funções utilitárias e lógica de negócio
@@ -111,7 +113,7 @@ Vanta Bot/
 
 ### ✅ O QUE FAZER:
 1. **100% DISCORD COMPONENTS V2 EM TUDO**: Todas as respostas de interação, mensagens e interfaces DEVEM utilizar `createContainer(...)` com a flag `IsComponentsV2`.
-2. **Hot-Reload Automático (Zero Reinicialização Manual)**: `npm run dev` configurado com `node --watch --env-file=.env --import=tsx ./src/index.ts`. O bot detecta qualquer alteração de código e reinicia instantaneamente em segundo plano.
+2. **Hot-Reload Automático (Zero Reinicialização Manual)**: `npm run dev` configurado com `node --watch-path=./src --watch --env-file=.env --import=tsx ./src/index.ts`. O bot detecta qualquer alteração ou novo arquivo no diretório `src/` e reinicia instantaneamente em segundo plano.
 3. **Checagem de Sintaxe Pré-Startup Obrigatória**: Antes de ligar o bot ou após alterações, execute `npm run check` (`tsc --noEmit`).
 4. **Auditoria dos Primeiros 10 Segundos**: Monitore a saída do terminal durante os primeiros 10 segundos para atestar que o processo subiu sem erros, conectou à API do Discord e abriu a porta 8080 do Fastify.
 5. **Subpath Imports Obrigatórios**: Utilize sempre `#env`, `#base`, `#database`, `#server`, `#functions` em vez de caminhos relativos profundos.
@@ -125,33 +127,52 @@ Vanta Bot/
 2. **NUNCA esquecer a flag `IsComponentsV2`**: O Discord não renderizará a interface se essa flag for omitida.
 3. **NÃO ligar o bot sem antes rodar `npm run check`**.
 4. **NÃO ignorar os logs nos primeiros 10 segundos de execução**.
-5. **NÃO altere o código sem atualizar este arquivo (`PROJECT_STATE.md`)**.
-6. **NÃO comite nem exponha tokens ou chaves privadas**.
-7. **NÃO utilize caminhos relativos como `../../../../`**.
-8. **NÃO crie ouvintes de interação manuais** fora do padrão `createResponder`.
-9. **NÃO faça split manual de strings em customId** (`customId.split("_")`).
-10. **NÃO passe apenas uma string para `createSection` sem acessório**: Se não houver acessório, use `createTextDisplay("...")` ou `createSection({ content: "..." })`.
+5. **NÃO reiniciar o bot manualmente de forma desnecessária**: use o watch mode.
+6. **NÃO altere o código sem atualizar este arquivo (`PROJECT_STATE.md`)**.
+7. **NÃO comite nem exponha tokens ou chaves privadas**.
+8. **NÃO utilize caminhos relativos como `../../../../`**.
+9. **NÃO crie ouvintes de interação manuais** fora do padrão `createResponder`.
+10. **NÃO faça split manual de strings em customId** (`customId.split("_")`).
+11. **NÃO use createSection sem acessório**: se for puro texto, utilize `createTextDisplay("...")`.
 
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
 
+### [Update #004] — Sistema de Presença Temática Rotativa & Comando /help em Components V2
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Criado `src/discord/events/presence.ts`: rotação automática e dinâmica a cada 20 segundos de Rich Presence, com frases temáticas de alto impacto no universo Vanta:
+     - 🌪️ `Ventando ecos sobre {membros} almas no Vanta` (`ActivityType.Custom`)
+     - ⚡ `Dúvidas sobre o cluster? Consulte /help` (`ActivityType.Playing`)
+     - 🌌 `Vigilante no ecossistema Vanta ({guilds} cluster ativo)` (`ActivityType.Watching`)
+     - 📡 `Sussurros na frequência do Vanta` (`ActivityType.Listening`)
+  2. Criado comando `/help` em `src/discord/commands/public/help.ts` rigorosamente em **100% Discord Components V2**:
+     - Container estruturado com tom `vantaAccent`.
+     - Seção de cabeçalho com botão acessório informativo.
+     - Blocos de texto formatados com `createTextDisplay` listando comandos (`/help`, `/ping`, `/counter`) e arquitetura.
+     - Flag mandatória `IsComponentsV2`.
+  3. Aprimorado `package.json` com `--watch-path=./src` para watch mode profundo de qualquer novo arquivo adicionado.
+  4. Protocolo de checagem prévia com `npm run check` passando com 0 erros.
+  5. Auditoria de 10 segundos confirmando auto-reload do daemon com os 3 comandos registrados e rotação de presença ativa.
+- **Arquivos Criados / Modificados**:
+  - `src/discord/events/presence.ts` (criado)
+  - `src/discord/commands/public/help.ts` (criado)
+  - `package.json` (atualizado script de watch)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.0.3`)
+
+---
+
 ### [Update #003] — Hot-Reload Nativo (Watch Mode), Checagem Pré-Startup & Auditoria de 10s
 - **Data**: 2026-11-13
 - **Autor / Agente**: Antigravity & Usuário
 - **Resumo da Entrega**:
-  1. Implementado sistema de **Hot-Reload Automático**: atualizado `package.json` para executar `node --watch --env-file=.env --import=tsx ./src/index.ts` em `npm run dev` e `npm run watch`. Não é mais necessário desligar e ligar o bot manualmente a cada modificação.
-  2. Estabelecido protocolo mandatório de **Conferência Pré-Startup**: rodar `npm run check` antes de subir o bot para certificar ausência de erros de sintaxe ou tipagem.
-  3. Estabelecido protocolo de **Auditoria dos 10 Segundos Iniciais**: inspecionar a saída do terminal logo após iniciar o processo.
-  4. Bot inicializado e verificado com sucesso como processo daemon contínuo:
-     - Conexão autenticada como `Vantinha#0419 (ID: 1567751920645308548)`.
-     - 2 comandos slash registrados (`/counter`, `/ping`).
-     - 2 responders registrados (`counter/:current`, `remind/:date`).
-     - Servidor Fastify ativo e respondendo na porta `8080`.
+  1. Configuração do watch mode no Node.js com `--import=tsx`.
+  2. Instituição da checagem pré-startup e auditoria dos primeiros 10 segundos.
+  3. Inicialização como daemon e teste da rota da API Fastify.
 - **Arquivos Criados / Modificados**:
-  - `package.json`: Script `dev` e `watch` atualizados para watch mode nativo com `--import=tsx`.
-  - `PROJECT_STATE.md`: Versão elevada para `Alpha 1.0.2`, registradas as regras de verificação pré-startup e auditoria dos primeiros 10 segundos.
-  - `C:\Users\pc\.gemini\config\skills\vantinha-project-ledger\SKILL.md`: Atualizado com as regras de verificação pré-startup e auditoria dos primeiros 10 segundos.
+  - `package.json`, `PROJECT_STATE.md`, `vantinha-project-ledger/SKILL.md`.
 
 ---
 
