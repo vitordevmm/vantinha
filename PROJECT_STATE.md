@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.5.0`  
-> **Status**: Ativo & Operacional (Gateway Mestre de Dados, User Sync E2E, Dashboard Overview, Detecção Global de Alts & Firestore Oficial)  
+> **Versão Vigente**: `Alpha 1.6.0`  
+> **Status**: Ativo & Operacional (Central /help Dinâmica, Auto-Descoberta de Comandos & Protocolo Contínuo de Atualização)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 009)  
+> **Última Atualização**: 2026-11-13 (Build 010)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -23,6 +23,7 @@
 > 2. **ANTES de ligar o bot**: execute SEMPRE `npm run check` (`tsc --noEmit`) para conferir se não há erros de sintaxe ou tipagem.
 > 3. **NOS PRIMEIROS 10 SEGUNDOS**: inspecione ativamente a saída do terminal para confirmar login, registro de comandos e startup do servidor sem erros.
 > 4. **DEPOIS de concluir**: atualize este arquivo incrementando a versão (`[Update #XXX]`), detalhando o que foi feito e listando os arquivos modificados.
+> 5. **REGRA MANDATÓRIA DE COMANDOS**: **SEMPRE atualizar e verificar o comando `/help` a cada novo comando criado**. O `/help` possui auto-descoberta dinâmica de comandos registrados e catálogo de metadados visuais (`COMMAND_METADATA`). Todo novo comando deve ser integrado e documentado.
 
 ---
 
@@ -151,6 +152,20 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #010] — Central /help Dinâmica, Auto-Descoberta de Comandos & Regra Mandatória
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Refatorado `src/discord/commands/public/help.ts`:
+     - Implementada **auto-descoberta dinâmica** de comandos registrados na aplicação Discord (`interaction.client.application.commands.cache`), eliminando o risco de comandos ficarem desatualizados.
+     - Implementado catálogo `COMMAND_METADATA` para enriquecer comandos com emojis temáticos oficiais e categorização.
+     - Contador dinâmico de comandos ativos no botão acessório da seção principal em Discord Components V2.
+     - Fallback resiliente caso haja oscilações temporárias na API do Discord.
+  2. Adicionada regra mandatória permanente no `PROJECT_STATE.md` (Regra #5 das Regras de Ouro) e na skill do projeto: **todo novo comando criado no Discord deve obrigatoriamente ser verificado e atualizado na central `/help`**.
+- **Arquivos Modificados**:
+  - `src/discord/commands/public/help.ts` (auto-descoberta dinâmica e Components V2)
+  - `PROJECT_STATE.md` (regra mandatória registrada, versão elevada para `Alpha 1.6.0`)
 
 ### [Update #009] — Gateway Mestre de Dados do Usuário & Dashboard com E2E AES-256-GCM
 - **Data**: 2026-11-13
