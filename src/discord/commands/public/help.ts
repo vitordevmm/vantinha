@@ -47,7 +47,7 @@ createCommand({
         const container = createContainer(
             constants.colors.vantaAccent,
             createSection(
-                `# 🌌 Central de Comandos • Vantinha\nEu sou o assistente oficial do ecossistema **Vanta**, operando em alta frequência com interface moderna **Discord Components V2**.`,
+                `# 🌌 Central de Comandos • Vantinha\nEu sou o assistente oficial do ecossistema **Vanta**, operando em alta frequência para auxiliar você e a comunidade.`,
                 new ButtonBuilder({
                     customId: "help/refresh",
                     label: `${totalCmds} Comandos Ativos`,
@@ -63,14 +63,13 @@ createCommand({
             ),
             Separator.Default,
             createTextDisplay(
-                "### 🛰️ Arquitetura & Status do Cluster\n" +
-                "• **Base:** Constatic Framework (TypeScript ESM Puro)\n" +
-                "• **UI Discord:** 100% Discord Components V2 Exclusivo\n" +
-                "• **API Web:** Fastify na porta `8080` com E2E AES-256-GCM\n" +
-                "• **Persistência:** Google Cloud Firestore (`vantinha-e9fca`)"
+                "### 🛰️ Suporte & Ecossistema Vanta\n" +
+                "• **Comunidade:** Vanta Ecosystem Oficial\n" +
+                "• **Status:** Operacional e vigilante 24/7\n" +
+                "• **Segurança:** Proteção de membros e gateway ativo"
             ),
             Separator.Hidden,
-            createTextDisplay("💡 *Dica: Novos comandos criados no bot aparecem automaticamente nesta central.*")
+            createTextDisplay("💡 *Dica: Use os comandos acima diretamente no chat para interagir com o Vantinha.*")
         );
 
         await interaction.reply({

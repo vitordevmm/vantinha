@@ -1,9 +1,9 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 1.6.0`  
-> **Status**: Ativo & Operacional (Central /help Dinâmica, Auto-Descoberta de Comandos & Protocolo Contínuo de Atualização)  
+> **Versão Vigente**: `Alpha 1.7.0`  
+> **Status**: Ativo & Operacional (Lei de Privacidade & Zero Exposição de Backend, /help Dinâmico & E2E AES-256-GCM)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
-> **Última Atualização**: 2026-11-13 (Build 010)  
+> **Última Atualização**: 2026-11-13 (Build 011)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -17,6 +17,16 @@
 
 ---
 
+> [!CAUTION]
+> ### 🔒 LEI SUPREMA DE PRIVACIDADE & SEGURANÇA: ZERO EXPOSIÇÃO DE BACKEND
+> **Detalhes internos de infraestrutura e backend NUNCA devem ser divulgados para usuários finais no Discord.**
+> - **Zero Exposição de Portas**: NUNCA divulgue portas de rede (ex: `8080`, `3000`).
+> - **Zero Exposição de Tecnologias/Frameworks**: NUNCA cite ferramentas ou frameworks em mensagens aos membros (`Constatic`, `Fastify`, `Typesaurus`, `Node.js`, `ESM`, etc.).
+> - **Zero Exposição de Banco de Dados**: NUNCA mencione projetos de nuvem internos ou nomes de banco (`vantinha-e9fca`, `Firestore`, coleções).
+> - **Foco Exclusivo no Usuário**: As mensagens do Discord devem focar 100% na experiência do membro, design da marca Vanta, utilidade pública e instruções claras, sem expor a superfície técnica de ataque.
+
+---
+
 > [!IMPORTANT]
 > **REGRAS DE OURO PARA QUALQUER IA OU DESENVOLVEDOR**:
 > 1. **ANTES de alterar**: leia este arquivo na íntegra para absorver diretrizes, arquitetura e convenções.
@@ -24,6 +34,7 @@
 > 3. **NOS PRIMEIROS 10 SEGUNDOS**: inspecione ativamente a saída do terminal para confirmar login, registro de comandos e startup do servidor sem erros.
 > 4. **DEPOIS de concluir**: atualize este arquivo incrementando a versão (`[Update #XXX]`), detalhando o que foi feito e listando os arquivos modificados.
 > 5. **REGRA MANDATÓRIA DE COMANDOS**: **SEMPRE atualizar e verificar o comando `/help` a cada novo comando criado**. O `/help` possui auto-descoberta dinâmica de comandos registrados e catálogo de metadados visuais (`COMMAND_METADATA`). Todo novo comando deve ser integrado e documentado.
+> 6. **BLINDAGEM DE PRIVACIDADE**: **NUNCA vazar dados de backend para usuários finais**. Portas, tecnologias de servidor e dados internos são mantidos em segredo estrito de desenvolvimento.
 
 ---
 
@@ -152,6 +163,26 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #011] — Promulgação da Lei de Privacidade & Purificação de Detalhes de Backend
+- **Data**: 2026-11-13
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. Promulgada a **Lei Suprema de Privacidade & Segurança: Zero Exposição de Backend**:
+     - Fica terminantemente proibido exibir portas de rede (ex: `8080`), nomes de bases/frameworks (`Constatic`, `Fastify`, `Typesaurus`, `Node.js`, `ESM`), nomes de projetos internos (`vantinha-e9fca`) ou coleções em qualquer mensagem direcionada aos usuários finais no Discord.
+  2. Executada a **Purificação Completa de Comandos e Componentes**:
+     - [src/discord/commands/public/help.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/commands/public/help.ts): Removidos todos os vazamentos de backend (portas, frameworks, bancos). Substituído por bloco oficial de suporte e comunidade Vanta.
+     - [src/discord/commands/public/ping.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/commands/public/ping.ts): Removida citação ao Constatic e Components V2 na mensagem pública.
+     - [src/discord/commands/public/counter.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/discord/commands/public/counter.ts): Ajustada a descrição pública para "Contador interativo oficial do Vantinha 🔢".
+     - [src/functions/verification.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/functions/verification.ts) e [src/database/functions/verification.ts](file:///c:/Users/pc/Documents/Vanta%20Bot/src/database/functions/verification.ts): Rodapé padronizado para "Vanta Security Gateway • Autenticação Segura" (eliminando termos técnicos de biblioteca).
+  3. Atualizada a skill de governança `vantinha-project-ledger` e a lista de Regras de Ouro no ledger do projeto.
+- **Arquivos Modificados**:
+  - `src/discord/commands/public/help.ts`
+  - `src/discord/commands/public/ping.ts`
+  - `src/discord/commands/public/counter.ts`
+  - `src/functions/verification.ts`
+  - `src/database/functions/verification.ts`
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 1.7.0`)
 
 ### [Update #010] — Central /help Dinâmica, Auto-Descoberta de Comandos & Regra Mandatória
 - **Data**: 2026-11-13

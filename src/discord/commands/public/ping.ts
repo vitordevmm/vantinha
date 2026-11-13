@@ -23,7 +23,7 @@ createCommand({
                 })
             ),
             Separator.Default,
-            createTextDisplay("🌌 **Vanta Bot** operando em alta performance com Constatic & Components V2.")
+            createTextDisplay("🌌 **Vantinha** operando em tempo real com alta performance e estabilidade.")
         );
 
         await interaction.reply({

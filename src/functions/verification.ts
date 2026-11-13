@@ -76,7 +76,7 @@ export function buildVerificationPanel(config: GuildVerificationConfig): Message
             "🔒 **Segurança Ativa:** Proteção contra contas duplicadas (alts) e verificação de integridade de rede."
         ),
         Separator.Hidden,
-        createTextDisplay(`*${config.ui.footerText || "Vanta Security Gateway • Components V2"}*`)
+        createTextDisplay(`*${config.ui.footerText || "Vanta Security Gateway • Autenticação Segura"}*`)
     );
 
     return {

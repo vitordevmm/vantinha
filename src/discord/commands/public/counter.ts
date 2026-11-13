@@ -5,7 +5,7 @@ import { ApplicationCommandType, ButtonBuilder, ButtonStyle, type InteractionRep
 
 createCommand({
     name: "counter",
-    description: "Comando contador demonstrando Discord Components V2 🔢",
+    description: "Contador interativo oficial do Vantinha 🔢",
     type: ApplicationCommandType.ChatInput,
     async run(interaction) {
         await interaction.reply(counterMenu(0));

@@ -22,7 +22,7 @@ export function getDefaultVerificationConfig(): GuildVerificationConfig {
             accentColor: constants.colors.vantaAccent,
             buttonLabel: "Verificar Conta",
             buttonEmoji: "🛡️",
-            footerText: "Vanta Security Gateway • Discord Components V2",
+            footerText: "Vanta Security Gateway • Autenticação Segura",
         },
     };
 }
