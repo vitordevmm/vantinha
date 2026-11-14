@@ -1,4 +1,5 @@
 import { createEvent } from "#base";
+import { startStatusSyncService } from "#functions";
 import ck from "chalk";
 
 createEvent({
@@ -18,5 +19,8 @@ createEvent({
 
         // Pré-aquece o cache de comandos na inicialização para resposta instantânea no /help
         await client.application?.commands.fetch().catch(() => null);
+
+        // Inicializa o serviço de sincronização horária de telemetria
+        startStatusSyncService(client);
     }
 });

@@ -6,6 +6,7 @@ import { schema, type Typesaurus } from "typesaurus";
 import type { GuildDocument } from "./documents/GuildDocument.js";
 import type { MemberDocument } from "./documents/MemberDocument.js";
 import type { UserDocument } from "./documents/UserDocument.js";
+import type { SystemStatusDocument } from "./documents/SystemStatusDocument.js";
 
 const candidatePaths = [
     env.FIREBASE_PATH,
@@ -38,16 +39,19 @@ export const db = schema(({ collection }) => ({
     guilds: collection<GuildDocument>().sub({
         members: collection<MemberDocument>()
     }),
-    users: collection<UserDocument>()
+    users: collection<UserDocument>(),
+    system: collection<SystemStatusDocument>()
 }));
 
 export type DatabaseSchema = Typesaurus.Schema<typeof db>;
 export type MemberSchema = DatabaseSchema["guilds"]["sub"]["members"]["Data"];
 export type GuildSchema = DatabaseSchema["guilds"]["Data"];
 export type UserSchema = DatabaseSchema["users"]["Data"];
+export type SystemStatusSchema = DatabaseSchema["system"]["Data"];
 
 export * from "./functions/guilds.js";
 export * from "./functions/members.js";
 export * from "./functions/verification.js";
 export * from "./functions/users.js";
 export type { UserDocument } from "./documents/UserDocument.js";
+export type { SystemStatusDocument } from "./documents/SystemStatusDocument.js";

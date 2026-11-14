@@ -14,6 +14,16 @@ interface VerificationSession {
 
 const activeSessions = new Map<string, VerificationSession>();
 
+export function getActiveVerificationSessionsCount(): number {
+    const now = Date.now();
+    for (const [token, session] of activeSessions.entries()) {
+        if (session.expiresAt < now) {
+            activeSessions.delete(token);
+        }
+    }
+    return activeSessions.size;
+}
+
 export function createVerificationSession(guildId: string, userId: string): string {
     const now = Date.now();
     for (const [token, session] of activeSessions.entries()) {

@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 2.4.0`  
-> **Status**: Ativo & Operacional (Sigilo Operacional nos READMEs, Licença Anti-Plágio Estrita & Trilingue PT-BR/EN/ES)  
+> **Versão Vigente**: `Alpha 2.5.0`  
+> **Status**: Ativo & Operacional (Telemetria Horária Ativa: Sincronização e Push a cada 1 hora ao Site, Persistência Firestore e API de Status Pública/Completa)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
-> **Última Atualização**: 2026-11-13 (Build 018)  
+> **Última Atualização**: 2026-11-14 (Build 019)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -171,10 +171,52 @@ Porta padrão: `8080`.
 | `GET` | `/api/users/:userId` | **Sim** | **Sim (Envelope)** | Dossiê completo do usuário com enriquecimento ao vivo do Discord |
 | `PUT` | `/api/users/:userId` | **Sim** | **Sim (Envelope)** | Atualiza status (`active`, `flagged`, `banned`) e anotações administrativas |
 | `POST` | `/api/users/:userId/action` | **Sim** | **Sim (Envelope)** | Dispara ações no Discord (`kick`, `ban`, `unban`) via Dashboard |
+| `GET` | `/api/bot/status` | Híbrido | Opcional | Retorna status público seguro (ou completo se autenticado via `x-api-key`) |
+| `GET` | `/api/bot/status/public` | Não | Não | Métricas públicas (membros, servidores, canais, ping, uptime) para o site |
+| `GET` | `/api/bot/status/full` | **Sim** | **Sim (Envelope)** | Dossiê completo de telemetria, hardware, comandos e servidores |
+| `POST` | `/api/bot/status/sync` | **Sim** | **Sim (Envelope)** | Força ciclo imediato de coleta, salvamento no Firestore e push ao site |
 
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #019] — API e Serviço de Telemetria Horária do Bot (Push a cada 1h, Firestore & Endpoints de Status)
+- **Data**: 2026-11-14
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. **Serviço de Telemetria Contínua Horária ([src/functions/statusSync.ts](src/functions/statusSync.ts))**:
+     - Coleta automatizada a cada 60 minutos (3.600.000 ms) e na inicialização pós-boot (5s).
+     - Extração exaustiva de métricas:
+       - **Identidade**: ID, username, tag, nome, avatar, status de presença.
+       - **Comunidade**: total de membros agregados, membros em cache, total de servidores e lista detalhada (ID, nome, ícone, membros, canais, cargos).
+       - **Canais**: total, texto, voz e categorias.
+       - **Rede**: WebSocket ping em ms e status de conexão com Discord.
+       - **Uptime**: segundos totais, timestamp de início e formato legível amigável (`Xd Xh Xm Xs`).
+       - **Segurança & Firestore**: total de usuários cadastrados, verificados, marcados, banidos, alts e VPNs detectados, além de sessões ativas de verificação.
+       - **Comandos**: total e lista de nomes de comandos registrados no Discord.
+       - **Sistema & Hardware**: versão do Node, plataforma, arquitetura, memória RSS, Heap Used e Heap Total em MB.
+     - **Persistência no Firestore**: Gravação automática do snapshot na coleção `system` (documento `bot_status`).
+     - **Push Ativo ao Site**: Disparo HTTP POST a cada 1 hora para `${env.DASHBOARD_URL}/api/bot/status` com headers de autenticação `x-api-key` e envelope criptografado AES-256-GCM.
+  2. **Novas Rotas Fastify ([src/server/routes/status.ts](src/server/routes/status.ts))**:
+     - `GET /api/bot/status`: Resposta adaptativa (pública e segura sem segredos por padrão, ou telemetria completa caso envie `x-api-key`).
+     - `GET /api/bot/status/public`: Endpoint aberto para a landing page do site exibir métricas do bot sem restrição.
+     - `GET /api/bot/status/full`: Endpoint protegido completo para o dashboard web do Vanta.
+     - `POST /api/bot/status/sync`: Endpoint administrativo para disparar a sincronização sob demanda.
+  3. **Ajustes de Parser Fastify ([src/server/index.ts](src/server/index.ts))**:
+     - Registrado parser genérico flexível para aceitar requisições POST com corpo vazio ou sem Content-Type.
+  4. Testes automatizados executados via PowerShell: todos os endpoints responderam com status 200 e dados consistentes.
+- **Arquivos Criados / Modificados**:
+  - `src/database/documents/SystemStatusDocument.ts` (criado)
+  - `src/database/index.ts` (coleção `system` integrada e tipada)
+  - `src/functions/statusSync.ts` (motor de coleta e sincronização horária)
+  - `src/functions/verification.ts` (exportação de contagem de sessões ativas)
+  - `src/functions/index.ts` (re-exportação das funções de telemetria)
+  - `src/server/routes/status.ts` (rotas REST de status)
+  - `src/server/routes/index.ts` (registro das rotas)
+  - `src/discord/events/ready.ts` (inicialização do timer horário no `clientReady`)
+  - `src/server/index.ts` (parser flexível de requisições POST)
+  - `package.json` (otimização do watch-path)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.5.0`)
 
 ### [Update #018] — Purificação dos READMEs (Remoção de Guias de Execução/Setup & Foco em Sigilo)
 - **Data**: 2026-11-13

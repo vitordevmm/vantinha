@@ -8,6 +8,18 @@ import { registerRoutes } from "./routes/index.js";
 const app = fastify();
 app.register(cors, { origin: "*" });
 
+// Suporte a requisições com content-type genérico ou texto
+app.addContentTypeParser("*", { parseAs: "string" }, (_req, body, done) => {
+    try {
+        if (!body || (typeof body === "string" && body.trim().length === 0)) {
+            return done(null, {});
+        }
+        return done(null, JSON.parse(body as string));
+    } catch {
+        return done(null, {});
+    }
+});
+
 createEvent({
     name: "Start Fastify Server",
     event: "clientReady", once: true,
