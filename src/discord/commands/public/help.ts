@@ -6,7 +6,7 @@ import { ApplicationCommandType, ButtonBuilder, ButtonStyle, MessageFlags } from
 const COMMAND_METADATA: Record<string, { emoji: string; category: string }> = {
     help: { emoji: constants.emojis.bussola, category: "Navegação" },
     ping: { emoji: constants.emojis.ping, category: "Diagnóstico" },
-    counter: { emoji: constants.emojis.coins, category: "Interativo" },
+    calculadora: { emoji: constants.emojis.coins, category: "Interativo" },
 };
 
 createCommand({
@@ -42,7 +42,7 @@ createCommand({
                 commandLines.push(
                     `• ${constants.emojis.bussola} **\`/help\`** — Central de auxílio e comandos do Vantinha.`,
                     `• ${constants.emojis.ping} **\`/ping\`** — Analisa a latência do gateway Discord e tempo de resposta.`,
-                    `• ${constants.emojis.coins} **\`/counter\`** — Contador interativo oficial do Vantinha.`
+                    `• ${constants.emojis.coins} **\`/calculadora\`** — Calculadora interativa oficial do Vantinha (+, -, ×, ÷, %).`
                 );
             }
 

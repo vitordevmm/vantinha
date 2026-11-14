@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 2.6.0`  
-> **Status**: Ativo & Operacional (Domínio Vercel Oficial Conectado: https://vantasite-puce.vercel.app, Telemetria Horária Ativa & Fluxo de Verificação em Produção)  
+> **Versão Vigente**: `Alpha 2.7.0`  
+> **Status**: Ativo & Operacional (Calculadora Interativa /calculadora em Produção, Domínio Vercel Oficial Conectado: https://vantasite-puce.vercel.app, Telemetria Horária Ativa & Fluxo de Verificação)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
-> **Última Atualização**: 2026-11-14 (Build 020)  
+> **Última Atualização**: 2026-11-14 (Build 021)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -119,7 +119,7 @@ Vanta Bot/
     │   ├── index.ts         # setupCreators() exportando createCommand, createResponder, createEvent
     │   ├── commands/        # Comandos Slash e Context Menus (100% Components V2)
     │   │   └── public/
-    │   │       ├── counter.ts # Exemplo interativo com Discord Components V2
+    │   │       ├── calculator.ts # Calculadora interativa (+, -, ×, ÷, %, modais) em Components V2
     │   │       ├── help.ts    # Central de ajuda e comandos (100% Components V2)
     │   │       └── ping.ts    # Latência WebSocket e gateway com container V2
     │   ├── responders/      # Ouvintes de botões, selects e modais com radix router
@@ -180,6 +180,42 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #021] — Substituição do /counter pela Calculadora Interativa /calculadora com Components V2
+- **Data**: 2026-11-14
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. **Transformação Completa do /counter em /calculadora**:
+     - Removido o comando `/counter` ([src/discord/commands/public/counter.ts](src/discord/commands/public/counter.ts)).
+     - Criado o novo comando interativo `/calculadora` ([src/discord/commands/public/calculator.ts](src/discord/commands/public/calculator.ts)), mantendo 100% da identidade visual solicitada pelo usuário (container Discord Components V2, paleta Vanta Roxo Elétrico `#7c3aed`, seções com botões acessórios estilizados e display numérico).
+  2. **Operações Matemáticas & Recursos Suportados**:
+     - **Opções Slash Opcionais**:
+       - `valor`: Inicia os cálculos a partir de um valor pré-definido.
+       - `expressao`: Avaliação direta de expressão matemática (ex: `50 + 20 * 2` ou `100 * 15%`) com sanitizador seguro via whitelist estrita de caracteres numéricos.
+     - **Botões Interativos com Modais**:
+       - `+` (Adicionar): abre modal solicitando valor a somar (com emoji oficial `mais` e botão verde `Success`).
+       - `-` (Subtrair): abre modal solicitando valor a subtrair (com emoji oficial `menos` e botão vermelho `Danger`).
+       - `×` (Multiplicar): abre modal solicitando multiplicador (botão azul `Primary`).
+       - `÷` (Dividir): abre modal solicitando divisor com proteção contra divisão por zero (botão azul `Primary`).
+       - `%` (Porcentagem): calcula a taxa percentual sobre o valor atual (botão cinza `Secondary`).
+       - `Definir`: abre modal para definir diretamente um novo valor total (com emoji oficial `edit`).
+       - `Resetar`: restaura a calculadora para 0 (com emoji oficial `repitaoutroca`).
+     - **Histórico Recente**: Exibe separador e feedback do último cálculo executado (ex: `10 + 5 = 15`, `20% de 50 = 10`, `Resetada para 0`) acompanhado do emoji oficial `relogio`.
+  3. **Lei dos Emojis Vanta & Conformidade de UI**:
+     - 100% aderente à Lei dos Emojis de `constants.json` (`coins`, `mais`, `menos`, `repitaoutroca`, `edit`, `relogio`).
+     - Para `×`, `÷` e `%`, mantidos botões com caracteres limpos enquanto o usuário providencia emojis customizados, respeitando a proibição de uso de emojis Unicode genéricos.
+  4. **Atualização Mandatória da Central /help e Telemetria**:
+     - Atualizado [src/discord/commands/public/help.ts](src/discord/commands/public/help.ts) no catálogo `COMMAND_METADATA` e no fallback de comandos para referenciar `/calculadora`.
+     - Atualizado [src/functions/statusSync.ts](src/functions/statusSync.ts) na lista de fallback para telemetria horária.
+  5. **Verificação & Typecheck**:
+     - `npm run check` executado com 0 erros (`✔ Ok`).
+     - Daemon hot-reload registrou `/calculadora`, `calc/reset`, `calc/btn/:operation/:current` e `calc/modal/:operation/:current` sem falhas.
+- **Arquivos Criados / Modificados / Removidos**:
+  - `src/discord/commands/public/calculator.ts` (criado)
+  - `src/discord/commands/public/counter.ts` (removido)
+  - `src/discord/commands/public/help.ts` (atualizado)
+  - `src/functions/statusSync.ts` (atualizado)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.7.0`)
 
 ### [Update #020] — Integração do Domínio de Produção Vercel (https://vantasite-puce.vercel.app)
 - **Data**: 2026-11-14

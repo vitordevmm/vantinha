@@ -79,7 +79,7 @@ export async function collectBotStatus(client: Client<true>): Promise<SystemStat
     const appCommands = client.application?.commands.cache;
     const commandNames = appCommands && appCommands.size > 0
         ? Array.from(appCommands.values()).map((c) => c.name)
-        : ["counter", "help", "ping"];
+        : ["calculadora", "help", "ping"];
 
     // 4. Recursos de Sistema
     const mem = process.memoryUsage();
