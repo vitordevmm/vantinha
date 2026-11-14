@@ -1,10 +1,10 @@
 # 🌌 Vantinha (Bot do Vanta) — Project State & Ledger
 
-> **Versão Vigente**: `Alpha 2.5.0`  
-> **Status**: Ativo & Operacional (Telemetria Horária Ativa: Sincronização e Push a cada 1 hora ao Site, Persistência Firestore e API de Status Pública/Completa)  
+> **Versão Vigente**: `Alpha 2.6.0`  
+> **Status**: Ativo & Operacional (Domínio Vercel Oficial Conectado: https://vantasite-puce.vercel.app, Telemetria Horária Ativa & Fluxo de Verificação em Produção)  
 > **ID da Aplicação Discord**: `1567751920645308548`  
 > **Repositório GitHub**: `https://github.com/vitordevmm/vantinha` (Ramos: `main` e `master` sincronizados)  
-> **Última Atualização**: 2026-11-14 (Build 019)  
+> **Última Atualização**: 2026-11-14 (Build 020)  
 > **Ambiente**: Node.js / Bun / TypeScript (ESM Puro)  
 
 ---
@@ -55,6 +55,7 @@
 - **ID do Bot**: `1567751920645308548`
 - **Repositório / Workspace**: `c:\Users\pc\Documents\Vanta Bot`
 - **Repositório Remoto GitHub**: `https://github.com/vitordevmm/vantinha` (origin)
+- **Domínio Oficial do Dashboard / Site (Vercel)**: `https://vantasite-puce.vercel.app` (variável `DASHBOARD_URL` no `.env`)
 - **Token do Discord**: Armazenado com segurança exclusivamente no arquivo `.env` (variável `BOT_TOKEN`), validado em `src/env.ts`.
 - **Banco de Dados**: Google Cloud Firestore (via `typesaurus` + `firebase-admin`). Projeto oficial: `vantinha-e9fca`. Credenciais salvas em `firebase.json` e `serviceAccount.json` (ambos protegidos no `.gitignore`). Coleções ativas: `guilds`, `guilds/:id/members` e `users`.
 - **Servidor Web API**: Fastify rodando na porta `8080` (variável `SERVER_PORT`) para comunicação bidirecional com o futuro site/dashboard do Vanta.
@@ -179,6 +180,23 @@ Porta padrão: `8080`.
 ---
 
 ## 5. Histórico de Atualizações Enumeradas (Changelog)
+
+### [Update #020] — Integração do Domínio de Produção Vercel (https://vantasite-puce.vercel.app)
+- **Data**: 2026-11-14
+- **Autor / Agente**: Antigravity & Usuário
+- **Resumo da Entrega**:
+  1. **Configuração do Domínio Oficial do Site na Vercel**:
+     - Atualizada a variável `DASHBOARD_URL` no `.env` para apontar diretamente para `https://vantasite-puce.vercel.app`.
+     - Atualizado o fallback em [src/env.ts](src/env.ts) e modelo [.env.example](.env.example).
+  2. **Efeito no Ecossistema**:
+     - **Push de Telemetria Horária**: O bot passa a disparar a cada 1 hora requisições HTTP POST criptografadas em AES-256-GCM para `https://vantasite-puce.vercel.app/api/bot/status`.
+     - **Fluxo de Verificação de Membros**: O botão interativo de verificação (`verification/start`) agora redireciona os membros do Discord diretamente para `https://vantasite-puce.vercel.app/verify?token=...&guild=...`.
+  3. Teste de conexão executado com sucesso: o bot enviou o pacote de status via POST e recebeu confirmação de roteamento na Vercel.
+- **Arquivos Modificados**:
+  - `.env` (atualizado `DASHBOARD_URL`)
+  - `.env.example` (atualizado modelo)
+  - `src/env.ts` (atualizado fallback padrão)
+  - `PROJECT_STATE.md` (versão elevada para `Alpha 2.6.0`)
 
 ### [Update #019] — API e Serviço de Telemetria Horária do Bot (Push a cada 1h, Firestore & Endpoints de Status)
 - **Data**: 2026-11-14

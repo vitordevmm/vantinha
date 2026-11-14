@@ -7,7 +7,7 @@ export const env = await validateEnv(z.object({
     BOT_ID: z.string().optional().default("1567751920645308548"),
     FIREBASE_PATH: z.string().default("./firebase.json"),
     SERVER_PORT: z.coerce.number().min(1).default(8080),
-    DASHBOARD_URL: z.string().default("http://localhost:3000"),
+    DASHBOARD_URL: z.string().default("https://vantasite-puce.vercel.app"),
     API_SECRET_KEY: z.string().default("vanta_secret_token_dev"),
     API_ENCRYPTION_KEY: z.string().default("vanta_aes256_super_secret_cipher_key_2026"),
     WEBHOOK_LOGS_URL: z.string().url().optional(),
